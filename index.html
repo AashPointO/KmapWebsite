@@ -9,14 +9,14 @@
 		<div id="genBody">
 			<div>
 				<h1> K-Map Generator with Multiple Outputs </h1>
-				<div class="all-inputs">
-					<p id="input-output-fields" class="standard-border"> 
-					numInputs:  <input type="number" name="numinputs" id="nBits"
+				<div>
+					<p id="input-text-fields" class="standard-border"> 
+					numInputs:  <input type="number" id="nBits"
 						       value=2 min=2 max=6
 						       onfocusout="ensureValidBounds('nBits', 2, 6)">
 					<br>
 					<br>
-					numOutputs:  <input type="number" name="numoutputs" id="nOutputs"
+					numOutputs:  <input type="number" id="nOutputs"
 							 value=1 min=1 max=8 
 							 onfocusout="fixBounds('nOutputs', 1, 6)">
 					</p>
@@ -31,8 +31,8 @@
 				<table id="truth-table" class="standard-border">
 					<tr id="row-head"> 
 						<th>   </th>
-						<th id='input-bit-2'> A </th>
-						<th id='input-bit-1'> B </th>
+						<th id='bit-2'> A </th>
+						<th id='bit-1'> B </th>
 						<th id='output-set-1'> y </th>
 					</tr>
 											<!--	
@@ -61,10 +61,12 @@ function initTruthTable(tableRef, numInputs, desiredNumOutputs) {
 	let currNumRows = 1;
 	let numRowsNeeded = Math.pow(2, numInputs) + 1;
 	addRows(tableRef, currNumRows, numRowsNeeded);
+	addIndexCols(tableRef, currNumRows);
 	addBitCols(tableRef, numInputs, desiredNumOutputs);
+	//addOutputCols(tableRef, 
 }
 
-			document.getElementById("nBits").addEventListener("focusout", inputFieldFocusOut);
+			document.getElementById("nBits").addEventListener("focusout", bitTextFieldFocusOut);
 			document.getElementById("nOutputs").addEventListener("focusout", outputFieldFocusOut);
 			
 		</script>

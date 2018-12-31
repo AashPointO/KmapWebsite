@@ -10,8 +10,8 @@ html, html * {
 	font-family: Libre Baskerville;
 }
 
-#input-output-fields {
-	/* ::TODO::
+#input-text-fields {
+	/* :: TODO ::
 	 * 	make scalability of words look better;
 	 * 	keeps on cutting past box
 	 */
@@ -20,7 +20,7 @@ html, html * {
 	text-align: left;
 }
 
-#input-output-fields *, .output-value {
+#input-text-fields *, .output-value {
 	text-align: center;
 	float: right;
 	margin: auto;
@@ -35,9 +35,6 @@ html, html * {
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 3vw;
-	/*margin-bottom: auto;
-	/*margin: auto;
-	margin-top: 35px;*/
 }
 
 #truth-table {

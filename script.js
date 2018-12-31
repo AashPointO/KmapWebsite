@@ -52,10 +52,16 @@ function addRows(tableRef, currNumRows, desiredNumRows) {
 	// Tags on the index to the start of the row for good measure
 	for (i = currNumRows; i < desiredNumRows; i++) {
 		let newRow = tableRef.insertRow(-1); // Insert a row at the end of the table, and grab reference to given row
-		let indexNode = document.createElement("th");
-		indexNode.innerHTML = i;
-		tableRef.rows[i].appendChild(indexNode);
 	}
+}
+
+function addIndexCols(tableRef, indexFirstRowAdded) {
+	for (row = indexFirstRowAdded; row < tableRef.rows.length; row++) {
+		let indexNode = document.createElement("th");
+		indexNode.innerHTML = row;
+		tableRef.rows[row].appendChild(indexNode);
+	}
+
 }
 
 function removeBitCols(tableRef, numBits, numOutputs) {
@@ -70,17 +76,18 @@ function removeBitCols(tableRef, numBits, numOutputs) {
 }
 
 function addBitCols(tableRef, numBits, numOutputs) {
-	let desiredNumCols = numBits + numOutputs + 1; // Add 1 for index cell 
+	// ** Only adds cols for left half of table //
+	let desiredNumBitCols = numBits; // Add 1 for index cell 
 	for (currRow = 0; currRow < tableRef.rows.length; currRow++) {
-		let currNumCols = tableRef.rows[currRow].cells.length;
+		let currNumBitCols = tableRef.rows[currRow].cells.length - (numOutputs+1);
 		// Each row may not necessarily need the same numCols added
-		for (col = currNumCols; col < desiredNumCols; col++) {
+		for (i = currNumBitCols; i < desiredNumBitCols; i++) {
 			tableRef.rows[currRow].insertCell(1);
 		}
 	}
 }
 
-function inputFieldFocusOut() {
+function bitTextFieldFocusOut() {
 	let tableRef = document.getElementById("truth-table");
 	let numBitsFieldRef = document.getElementById("nBits");
 	let numOutFieldRef = document.getElementById("nOutputs");
@@ -96,6 +103,7 @@ function inputFieldFocusOut() {
 		removeBitCols(tableRef, numBits, numOutputs);
 	} else {
 		addRows(tableRef, currNumRows, desiredNumRows);
+		addIndexCols(tableRef, currNumRows); // currNumRows acts like the previous amount of rows here
 		addBitCols(tableRef, numBits, numOutputs);
 	}
 }
