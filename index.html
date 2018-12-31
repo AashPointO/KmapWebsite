@@ -2,8 +2,103 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="style.css">
-		<script src="script.js"></script>
+		<script src="script.js">
+		</script>
 	</head>
 	<body>
+		<div id="genBody">
+			<div>
+				<h1> K-Map Generator with Multiple Outputs </h1>
+				<div class="all-inputs">
+					<p id="input-output-fields" class="standard-border"> 
+					numInputs:  <input type="number" name="numinputs" id="nInputs"
+						       value=2 min=2 max=6
+						       onfocusout="ensureValidBounds('nInputs', 2, 6)">
+					<br>
+					<br>
+					numOutputs:  <input type="number" name="numoutputs" id="nOutputs"
+							 value=1 min=1 max=8 
+							 onfocusout="fixBounds('nOutputs', 1, 6)">
+					</p>
+
+					<!--	 *** TODO *** 
+	    					 ADD ROW VECTORS HERE 
+						 have inputOutputFields centered with rowVectors
+
+					-->
+				</div>
+
+				<table id="truth-table" class="standard-border">
+					<tr id="row-head"> 
+						<th>   </th>
+						<th> A </th>
+						<th> B </th>
+						<th> y </th>
+					</tr>
+					<tr id="row1">
+						<th> 1 </th>
+						<td> 0 </td>
+						<td> 0 </td>
+						<td> <input type="text" id="y11" 
+						 	maxLength=1 value=0 class="output-value"
+							onfocusout="ensureValidOutput('y11')">
+						</td>
+					</tr>
+					<tr id="row2">
+						<th> 2 </th>
+						<td> 0 </td>
+						<td> 1 </td>
+						<td> <input type="text" id="y12" 
+						 	maxLength=1 value=0 class="output-value"
+							onfocusout="ensureValidOutput('y12')">
+						</td>
+					</tr>
+					<tr id="row3">
+						<th> 3 </th>
+						<td> 1 </td>
+						<td> 0 </td>
+						<td> <input type="text" id="y13" 
+						 	maxLength=1 value=0 class="output-value"
+							onfocusout="ensureValidOutput('y13')">
+						</td>
+					</tr>
+					<tr id="row4">
+						<th> 4 </th>
+						<td> 1 </td>
+						<td> 1 </td>
+						<td> <input type="text" id="y14" 
+						 	maxLength=1 value=0 class="output-value"
+							onfocusout="ensureValidOutput('y14')">
+						</td>
+					</tr>
+				</table>
+
+			</div>
+		</div>
+		<script>
+			document.getElementById("nInputs").addEventListener("focusout", inputFieldFocusOut);
+			document.getElementById("nOutputs").addEventListener("focusout", outputFieldFocusOut);
+			function inputFieldFocusOut() {
+				let tableId = "truth-table";
+
+				let tableRef = document.getElementById(tableId);
+				let numInputsRequested = parseInt(document.getElementById("nInputs").value);
+				let desiredNumRows = Math.pow(2, numInputsRequested) + 1; // header counts as a row as well
+				let currNumRows = parseInt(tableRef.rows.length);
+				
+				let currNumCols = tableRef.rows[0].cells.length;
+				let desiredNumCols = numInputsRequested + 2;
+				//alert("curr=" + currNumCols + " des=" + desiredNumCols);
+				if (currNumRows > desiredNumRows) {
+					removeRows(tableRef, currNumRows, desiredNumRows);
+					removeCols(tableRef, currNumCols, desiredNumCols, 1);
+
+				} else {
+					addRows(tableRef, currNumRows, desiredNumRows);
+					addCols(tableRef, currNumCols, desiredNumCols, 1);
+				}
+
+			}
+		</script>
 	</body>
 </html>

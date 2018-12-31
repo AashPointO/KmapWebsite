@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css?family=Libre+Baskerville');
+
+html {
+	height: 100vh;
+	background-repeat: no-repeat;
+	background-image: linear-gradient(#8d9ec6, 30%, #247191);
+}
+
+html, html * {
+	font-family: Libre Baskerville;
+}
+
+#input-output-fields {
+	/* ::TODO::
+	 * 	make scalability of words look better;
+	 * 	keeps on cutting past box
+	 */
+	padding: 20px;
+	width: 15%;
+	text-align: left;
+}
+
+#input-output-fields *, .output-value {
+	text-align: center;
+	float: right;
+	margin: auto;
+}
+
+#genBody {
+	height: 100%;
+	width: 90%;
+	border-radius: 5px;
+	background-image: linear-gradient(#f9f9f9, 80%, #cecece);
+	padding: 2.5%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 3vw;
+	/*margin-bottom: auto;
+	/*margin: auto;
+	margin-top: 35px;*/
+}
+
+#truth-table {
+	border-collapse: collapse;
+	width: 15%;
+	padding: 2.5%;
+	text-align: center;
+}
+
+#truth-table * {
+	padding: 5px;
+	font-size: 100%;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+}
+.bolden {
+	padding: 5px;
+	font-size: 100%;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+}
+
+#truth-table input {
+	width: 1em;
+
+}
+
+.standard-border {
+	border-style: solid;
+	border-color: black;
+	border-radius: 5px;
+	border-width: 2.5px;
+	background-color: rgba(0, 0, 0, .025);
+}
+
