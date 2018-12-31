@@ -48,34 +48,55 @@ function removeRows(tableRef, currNumRows, desiredNumRows) {
 
 function addRows(tableRef, currNumRows, desiredNumRows) {
 	let numCells = tableRef.rows[0].cells.length;
-	
+	// Iterates for each extra row needed
+	// Tags on the index to the start of the row for good measure
 	for (i = currNumRows; i < desiredNumRows; i++) {
 		let newRow = tableRef.insertRow(-1); // Insert a row at the end of the table, and grab reference to given row
-		let cols = new Array(numCells);
 		let indexNode = document.createElement("th");
 		indexNode.innerHTML = i;
 		tableRef.rows[i].appendChild(indexNode);
-		for (j = 1; j < numCells; j++) {
-			cols[j] = newRow.insertCell(j);
+	}
+}
+
+function removeBitCols(tableRef, numBits, numOutputs) {
+	let desiredNumCols = numBits + numOutputs + 1; // Add 1 for index cell 
+	for (currRow = 0; currRow < tableRef.rows.length; currRow++) { // for each row ...
+		let currNumCols = tableRef.rows[currRow].cells.length;
+		// Each row may not necessarily need the same numCols removed 
+		for (col = currNumCols; col > desiredNumCols; col--) {
+			tableRef.rows[currRow].deleteCell(1);
 		}
 	}
 }
 
-function removeCols(tableRef, currNumCols, desiredNumCols, numOutputs) {
-	for (i = currNumCols; i > desiredNumCols; i--){
-		for (j = 0; j < tableRef.rows.length; j++) {
-			tableRef.rows[j].deleteCell(i - (numOutputs+1));
+function addBitCols(tableRef, numBits, numOutputs) {
+	let desiredNumCols = numBits + numOutputs + 1; // Add 1 for index cell 
+	for (currRow = 0; currRow < tableRef.rows.length; currRow++) {
+		let currNumCols = tableRef.rows[currRow].cells.length;
+		// Each row may not necessarily need the same numCols added
+		for (col = currNumCols; col < desiredNumCols; col++) {
+			tableRef.rows[currRow].insertCell(1);
 		}
 	}
 }
 
-function addCols(tableRef, currNumCols, desiredNumCols, numOutputs) {
-	for (i = currNumCols; i < desiredNumCols; i++) { 
-		for (j = 0; j < tableRef.rows.length; j++) {
-			tableRef.rows[j].insertCell(i - numOutputs);
-		}
-		let letter = getCorrespondingLetter(i-1);
-		tableRef.rows[0].cells[i - numOutputs].outerHTML = "<th>" + letter + "</th>"
+function inputFieldFocusOut() {
+	let tableRef = document.getElementById("truth-table");
+	let numBitsFieldRef = document.getElementById("nBits");
+	let numOutFieldRef = document.getElementById("nOutputs");
+	
+	let numBits = parseInt(numBitsFieldRef.value);
+	let numOutputs = parseInt(numOutFieldRef.value);
+
+	let currNumRows = parseInt(tableRef.rows.length);
+	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
+	
+	if (currNumRows > desiredNumRows) {
+		removeRows(tableRef, currNumRows, desiredNumRows);
+		removeBitCols(tableRef, numBits, numOutputs);
+	} else {
+		addRows(tableRef, currNumRows, desiredNumRows);
+		addBitCols(tableRef, numBits, numOutputs);
 	}
 }
 
