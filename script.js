@@ -22,19 +22,6 @@ function ensureValidOutput(Id) {
 			document.getElementById(Id).value = 0;
 		}
 	}
-
-}
-
-function resizeTruthTableInputs(numInputsWanted, currNumInputs, tableId) {
-	for (i = currNumInputs; i < numInputsWanted; i++) {
-		document.getElementById(tableId).insertRow(numInputs);
-	}
-}
-
-function resizeTruthTableOutputs(numOutputsWanted, currNumOutputs, table) {
-	for (i = currNumOutputs; i < numOutputsWanted; i++) {
-		table.insertCell(numOutputs);
-	}
 }
 
 function removeRows(tableRef, currNumRows, desiredNumRows) {
@@ -56,7 +43,6 @@ function addRows(tableRef, numRows, desiredNumRows) {
 	}
 	return desiredNumRows;
 }
-
 
 function removeBitCols(tableRef, numBits, numOutputs) {
 	let desiredNumCols = numBits + numOutputs + 1; // Add 1 for index cell 
@@ -103,10 +89,11 @@ function addOutputCols(tableRef, numBits, desiredNumOutputs) {
 
 }
 
-function bitTextFieldFocusOut() {
+function textFieldFocusOut() {
 	let tableRef = document.getElementById("truth-table");
 	
 	let numBits = parseInt(document.getElementById("nBits").value);
+	let numOutputs = parseInt(document.getElementById("nOutputs").value);
 
 	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
 	if (parseInt(tableRef.dataset.rows) > desiredNumRows) {
@@ -115,28 +102,9 @@ function bitTextFieldFocusOut() {
 	} else if (parseInt(tableRef.dataset.rows.length) < desiredNumRows) {
 		tableRef.dataset.rows = addRows(tableRef, parseInt(tableRef.dataset.rows), desiredNumRows);
 		addIndexCols(tableRef, tableRef.dataset.rows); // currNumRows acts like the previous amount of rows here
+		addHeaderCols(tableRef, numBits, numOutputs);
 		//addBitCols(tableRef, numBits, numOutputs);
 	}
-}
-
-function outputTextFieldFocusOut() {
-	let tableRef = document.getElementById("truth-table");
-	let numBitsFieldRef = document.getElementById("nBits");
-	let numOutFieldRef = document.getElementById("nOutputs");
-	
-	let numBits = parseInt(numBitsFieldRef.value);
-	let numOutputs = parseInt(numOutFieldRef.value);
-
-	let desiredNumOutputs = parseInt(numOutFieldRef.value);
-
-	let currNumRows = parseInt(tableRef.rows.length);
-	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
-	if (numOutputs > desiredNumOutputs) {
-
-	} else {
-		addOutputCols(tableRef, numBits, desiredNumOutputs);
-	}
-
 }
 
 function getCorrespondingLetter(num) {
