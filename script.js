@@ -1,4 +1,3 @@
-
 function checkTextField(fieldId) {
 	var regExCheckBounds = RegExp("[1-5]")
 	if (regEx.test(document.getElementById(fieldId).value)) {
@@ -44,25 +43,20 @@ function removeRows(tableRef, currNumRows, desiredNumRows) {
 		//      tableRef.deleteRow(parseInt(tableRef.rows.length)-1);
 		tableRef.deleteRow(i-1);
 	}
+	return desiredNumRows;
+
 }
 
-function addRows(tableRef, currNumRows, desiredNumRows) {
-	let numCells = tableRef.rows[0].cells.length;
-	// Iterates for each extra row needed
-	// Tags on the index to the start of the row for good measure
-	for (i = currNumRows; i < desiredNumRows; i++) {
-		let newRow = tableRef.insertRow(-1); // Insert a row at the end of the table, and grab reference to given row
+function addRows(tableRef, numRows, desiredNumRows) { 
+	for (i = numRows; i < desiredNumRows; i++) {
+		let newRow = tableRef.insertRow(-1); // -1 parameter denotes end of table
+		let colCountAttribute = document.createAttribute("data-cols");
+		colCountAttribute.value = 0;
+		newRow.setAttributeNode(colCountAttribute);
 	}
+	return desiredNumRows;
 }
 
-function addIndexCols(tableRef, indexFirstRowAdded) {
-	for (row = indexFirstRowAdded; row < tableRef.rows.length; row++) {
-		let indexNode = document.createElement("th");
-		indexNode.innerHTML = row;
-		tableRef.rows[row].appendChild(indexNode);
-	}
-
-}
 
 function removeBitCols(tableRef, numBits, numOutputs) {
 	let desiredNumCols = numBits + numOutputs + 1; // Add 1 for index cell 
@@ -75,19 +69,57 @@ function removeBitCols(tableRef, numBits, numOutputs) {
 	}
 }
 
-function addBitCols(tableRef, numBits, numOutputs) {
-	// ** Only adds cols for left half of table //
-	let desiredNumBitCols = numBits; // Add 1 for index cell 
-	for (currRow = 0; currRow < tableRef.rows.length; currRow++) {
-		let currNumBitCols = tableRef.rows[currRow].cells.length - (numOutputs+1);
-		// Each row may not necessarily need the same numCols added
-		for (i = currNumBitCols; i < desiredNumBitCols; i++) {
-			tableRef.rows[currRow].insertCell(1);
+function addIndexCols(tableRef, numRows) {
+	for (i = 0; i < numRows; i++) {
+		if (!indexCellsExists(tableRef, i)) {
+			tableRef.rows[i].dataset.cols = 1;
+			let indexNode = document.createElement("th");
+			indexNode.innerHTML = i;
+			tableRef.rows[i].appendChild(indexNode);
 		}
 	}
 }
 
+function indexCellsExists(tableRef, index) {
+	return (parseInt(tableRef.rows[index].dataset.cols) != 0);
+}
+
+
+function addBitCols(tableRef, currNumBits, desiredNumBits) {
+	for (row = 0; row < tableRef.rows.length; row++) { // for each row ...
+		for (i = currNumBits; i < desiredNumBits; i++) {
+			tableRef.rows[row].insertCell(1);
+		}
+	}
+}
+
+function addOutputCols(tableRef, numBits, desiredNumOutputs) {
+	let currNumOutputs = tableRef.rows[0].cells.length - (numBits + 1);
+	for (row = 0; row < tableRef.rows.length; row++) { // for each row ...
+		for (i = currNumOutputs; i < desiredNumOutputs; i++) {
+			tableRef.rows[row].insertCell(i);
+		}
+	}
+
+}
+
 function bitTextFieldFocusOut() {
+	let tableRef = document.getElementById("truth-table");
+	
+	let numBits = parseInt(document.getElementById("nBits").value);
+
+	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
+	if (parseInt(tableRef.dataset.rows) > desiredNumRows) {
+		tableRef.dataset.rows = removeRows(tableRef, parseInt(tableRef.dataset.rows), desiredNumRows);
+		//removeBitCols(tableRef, numBits, numOutputs);
+	} else if (parseInt(tableRef.dataset.rows.length) < desiredNumRows) {
+		tableRef.dataset.rows = addRows(tableRef, parseInt(tableRef.dataset.rows), desiredNumRows);
+		addIndexCols(tableRef, tableRef.dataset.rows); // currNumRows acts like the previous amount of rows here
+		//addBitCols(tableRef, numBits, numOutputs);
+	}
+}
+
+function outputTextFieldFocusOut() {
 	let tableRef = document.getElementById("truth-table");
 	let numBitsFieldRef = document.getElementById("nBits");
 	let numOutFieldRef = document.getElementById("nOutputs");
@@ -95,17 +127,16 @@ function bitTextFieldFocusOut() {
 	let numBits = parseInt(numBitsFieldRef.value);
 	let numOutputs = parseInt(numOutFieldRef.value);
 
+	let desiredNumOutputs = parseInt(numOutFieldRef.value);
+
 	let currNumRows = parseInt(tableRef.rows.length);
 	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
-	
-	if (currNumRows > desiredNumRows) {
-		removeRows(tableRef, currNumRows, desiredNumRows);
-		removeBitCols(tableRef, numBits, numOutputs);
+	if (numOutputs > desiredNumOutputs) {
+
 	} else {
-		addRows(tableRef, currNumRows, desiredNumRows);
-		addIndexCols(tableRef, currNumRows); // currNumRows acts like the previous amount of rows here
-		addBitCols(tableRef, numBits, numOutputs);
+		addOutputCols(tableRef, numBits, desiredNumOutputs);
 	}
+
 }
 
 function getCorrespondingLetter(num) {
@@ -126,4 +157,3 @@ function getCorrespondingLetter(num) {
 			return "NA";
 	}
 }
-

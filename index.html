@@ -11,7 +11,7 @@
 				<h1> K-Map Generator with Multiple Outputs </h1>
 				<div>
 					<p id="input-text-fields" class="standard-border"> 
-					numInputs:  <input type="number" id="nBits"
+					numBits:  <input type="number" id="nBits"
 						       value=2 min=2 max=6
 						       onfocusout="ensureValidBounds('nBits', 2, 6)">
 					<br>
@@ -28,14 +28,19 @@
 					-->
 				</div>
 
-				<table id="truth-table" class="standard-border">
+				<table id="truth-table" class="standard-border" data-rows="0">
+					<!--
+	     					Table is modified entirely in Javascript
+					-->
+						<!--
 					<tr id="row-head"> 
-						<th>   </th>
+						<th>  </th>
 						<th id='bit-2'> A </th>
 						<th id='bit-1'> B </th>
 						<th id='output-set-1'> y </th>
 					</tr>
-											<!--	
+						-->
+					<!--
 					<tr id="row1">
 						<th> 1 </th>
 						<td> 0 </td>
@@ -52,23 +57,22 @@
 		</div>
 		<script>
 			let tableRef = document.getElementById("truth-table");
-			let numInputs = parseInt(document.getElementById("nBits").value);
-			let numOutputs = parseInt(document.getElementById("nOutputs").value);
-			
-			initTruthTable(tableRef, numInputs, numOutputs);
-			
-function initTruthTable(tableRef, numInputs, desiredNumOutputs) {
-	let currNumRows = 1;
-	let numRowsNeeded = Math.pow(2, numInputs) + 1;
-	addRows(tableRef, currNumRows, numRowsNeeded);
-	addIndexCols(tableRef, currNumRows);
-	addBitCols(tableRef, numInputs, desiredNumOutputs);
-	//addOutputCols(tableRef, 
+			let desiredNumBits = parseInt(document.getElementById("nBits").value);
+			let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
+			initTruthTable(tableRef, desiredNumBits, desiredNumOutputs);
+
+function initTruthTable(tableRef, desiredNumBits, desiredNumOutputs) {
+	let numRowsNeeded = Math.pow(2, desiredNumBits) + 1; // + 1 being for the header
+	let i = parseInt(tableRef.dataset.rows);
+	tableRef.dataset.rows = addRows(tableRef, parseInt(tableRef.dataset.rows), numRowsNeeded);
+	addIndexCols(tableRef, parseInt(tableRef.dataset.rows));
+	//addBitCols(tableRef, currNumBits, desiredNumBits);
+	//addOutputCols(tableRef, numBits, numOutputs);
 }
 
 			document.getElementById("nBits").addEventListener("focusout", bitTextFieldFocusOut);
-			document.getElementById("nOutputs").addEventListener("focusout", outputFieldFocusOut);
-			
+debugger;
+			//document.getElementById("nOutputs").addEventListener("focusout", outputFieldTextFocusOut);
 		</script>
 	</body>
 </html>
