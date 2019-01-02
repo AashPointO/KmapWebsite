@@ -12,8 +12,8 @@
 				<div>
 					<p id="input-text-fields" class="standard-border"> 
 					numBits:  <input type="number" id="nBits"
-						       value=2 min=2 max=6
-						       onfocusout="ensureValidBounds('nBits', 2, 6)">
+						       value=2 min=2 max=4
+						       onfocusout="ensureValidBounds('nBits', 2, 4)">
 					<br>
 					<br>
 					numOutputs:  <input type="number" id="nOutputs"
@@ -25,19 +25,29 @@
 				<table id="truth-table" class="standard-border">
 					<!-- Table is modified entirely onto the truth-table -->
 				</table>
+
+				<br>
+				<br>
+				<br>
+				<hr>
+				<br>
+
+				<div class="flex-container" id="k-map-container" data-numtables="0" >
+				</div>
 			</div>
 		</div>
 		<script>
 			let tableRef = document.getElementById("truth-table");
+			let kMapContainerRef = document.getElementById("k-map-container");
 			let desiredNumBits = parseInt(document.getElementById("nBits").value);
 			let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 
-			initTruthTable(tableRef, desiredNumBits, desiredNumOutputs);
+			initTruthTable(tableRef, kMapContainerRef, desiredNumBits, desiredNumOutputs);
 			
 			document.getElementById("nBits").addEventListener("focusout", textFieldFocusOut);
 			document.getElementById("nOutputs").addEventListener("focusout", textFieldFocusOut);
 
-			function initTruthTable(tableRef, desiredNumBits, desiredNumOutputs) {
+			function initTruthTable(tableRef, kMapContainerRef, desiredNumBits, desiredNumOutputs) {
 				let numRowsNeeded = Math.pow(2, desiredNumBits) + 1; // + 1 being for the header
 
 				addRows(tableRef, numRowsNeeded);
@@ -49,7 +59,10 @@
 
 				addBinaryValues(tableRef);
 				addOutputTextFields(tableRef);
+
+				addAllKmaps(kMapContainerRef, desiredNumBits, desiredNumOutputs);
 			}
+
 		</script>
 	</body>
 </html>

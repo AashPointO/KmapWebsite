@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Libre+Baskerville');
 
 html {
-	height: 100vh;
+	height: 100%;
 	background-repeat: no-repeat;
 	background-image: linear-gradient(#8d9ec6, 30%, #247191);
 }
@@ -71,3 +71,14 @@ html, html * {
 	background-color: rgba(0, 0, 0, .025);
 }
 
+.flex-container {
+	display: flex;
+	flex-flow: row wrap;
+	align-items: left;
+	justify-content: space-between;
+	margin: -10px;
+}
+.flex-container>* {
+        flex: 1 1 160px;
+        margin: 20px;
+      }

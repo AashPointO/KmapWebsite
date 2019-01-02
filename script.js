@@ -50,6 +50,7 @@ function textFieldFocusOut() {
 	// Might not be the best solution? But easy to implement.
 	// Plus, considering its only a few elements its not like speeds an issue.
 	let tableRef = document.getElementById("truth-table");
+	let kMapContainerRef = document.getElementById("k-map-container");
 	
 	let numBits = parseInt(document.getElementById("nBits").value);
 	let numOutputs = parseInt(document.getElementById("nOutputs").value);
@@ -57,6 +58,7 @@ function textFieldFocusOut() {
 	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
 
 	removeAllRowsCols(tableRef);
+	kMapContainerRef.innerHTML = ""; // Removes all contents of the kMapContainer
 
 	addRows(tableRef,desiredNumRows);
 	addIndexCols(tableRef); // currNumRows acts like the previous amount of rows here
@@ -66,10 +68,15 @@ function textFieldFocusOut() {
 
 	addBinaryValues(tableRef);
 	addOutputTextFields(tableRef);
+	
+	addAllKmaps(kMapContainerRef, numBits, numOutputs);
+
+	document.getElementById("html")
 
 	//addStickyHeader(tableRef);
 	
 }
+
 function addStickyHeader(tableRef) {
 	// TODO: Try to make header sticky!!!
 	let stickyHeader = document.createElement("table");
@@ -95,7 +102,6 @@ function addBinaryValues(tableRef) {
 			if (tableRef.rows[i].cells[j].dataset.bitindex != null) {
 				let index = tableRef.rows[i].cells[j].dataset.bitindex;
 				let value = bitValue[index];
-				debugger;
 				if (typeof value === "undefined") {
 					tableRef.rows[i].cells[j].innerHTML = 0;
 				} else {				
@@ -184,7 +190,6 @@ function addHeaderCols(tableRef, numBits, numOutputs) {
 		/*document.onscroll = function() {
 			let rows = document.getElementById("truth-table").rows;
 			for (i = 1; i < rows.length; i++) {
-				debugger;
 				let offset = rows[0].cells[i].offsetTop;
 				console.log(offset);
 				let sticky = offset;
@@ -197,6 +202,45 @@ function addHeaderCols(tableRef, numBits, numOutputs) {
 		}
 */
 
+}
+
+function addAllKmaps(kMapContainer, numBits, numOutputs) {
+	 for (i = 0; i < numOutputs; i++) {
+		 kMapContainer.appendChild(generateKMapTable(numBits, i));
+		 kMapContainer.dataset.numtables = i+1;
+	 }
+		 console.log(kMapContainer.dataset.numtables);
+}
+
+function generateKMapTable(numBits, outputIndex) {
+	let kMapTable = document.createElement("TABLE");
+        kMapTable.classList.add("table-border");
+        kMapTable.classList.add("standard-border");
+	kMapTable.setAttribute("id", "k" + outputIndex);
+        kMapTable.insertRow(0);
+        kMapTable.insertRow(1);
+        kMapTable.rows[0].insertCell(0);
+        kMapTable.rows[0].insertCell(1);
+        kMapTable.rows[1].insertCell(0);
+
+	//kMapTable.rows[1].cells[0].style.transform = "rotate(" + -90 + "deg)"; //rotattion!
+	kMapTable.rows[0].cells[0].outerHTML = "<th> y" + (outputIndex+1) + "</th>";
+        
+	switch (numBits) {
+		case 2:
+			kMapTable.rows[0].cells[1].outerHTML = "<th>A</th>";
+			kMapTable.rows[1].cells[0].outerHTML = "<th>B</th>";
+			break;
+                case 3:
+			kMapTable.rows[0].cells[1].outerHTML = "<th>AB</th>";
+			kMapTable.rows[1].cells[0].outerHTML = "<th>C</th>";
+			break;
+                case 4:
+			kMapTable.rows[0].cells[1].outerHTML = "<th>AB</th>";
+			kMapTable.rows[1].cells[0].outerHTML = "<th>CD</th>";
+			break;
+	}
+	return kMapTable;
 }
 
 function indexCellsExists(tableRef, index) {
