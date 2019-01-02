@@ -18,40 +18,12 @@
 					<br>
 					numOutputs:  <input type="number" id="nOutputs"
 							 value=1 min=1 max=8 
-							 onfocusout="fixBounds('nOutputs', 1, 6)">
+							 onfocusout="ensureValidBounds('nOutputs', 1, 8)">
 					</p>
-
-					<!--	 *** TODO *** 
-	    					 ADD ROW VECTORS HERE 
-						 have inputOutputFields centered with rowVectors
-
-					-->
 				</div>
 
-				<table id="truth-table" class="standard-border" data-rows="0">
-					<!--
-	     					Table is modified entirely in Javascript
-					-->
-						<!--
-					<tr id="row-head"> 
-						<th>  </th>
-						<th id='bit-2'> A </th>
-						<th id='bit-1'> B </th>
-						<th id='output-set-1'> y </th>
-					</tr>
-						-->
-					<!--
-					<tr id="row1">
-						<th> 1 </th>
-						<td> 0 </td>
-						<td> 0 </td>
-						<td> 
-<input type="text" id="y11" 
-						 	maxLength=1 value=0 class="output-value"
-							onfocusout="ensureValidOutput('y11')">
-						</td>
-					</tr>
-						-->
+				<table id="truth-table" class="standard-border">
+					<!-- Table is modified entirely onto the truth-table -->
 				</table>
 			</div>
 		</div>
@@ -65,51 +37,19 @@
 			document.getElementById("nBits").addEventListener("focusout", textFieldFocusOut);
 			document.getElementById("nOutputs").addEventListener("focusout", textFieldFocusOut);
 
+			function initTruthTable(tableRef, desiredNumBits, desiredNumOutputs) {
+				let numRowsNeeded = Math.pow(2, desiredNumBits) + 1; // + 1 being for the header
 
+				addRows(tableRef, numRowsNeeded);
+				addIndexCols(tableRef, parseInt(tableRef.rows.length));
+				addHeaderCols(tableRef, desiredNumBits, desiredNumOutputs);
 
+				addBitCols(tableRef, desiredNumBits);
+				addOutputCols(tableRef, desiredNumBits, desiredNumOutputs);
 
-
-
-function initTruthTable(tableRef, desiredNumBits, desiredNumOutputs) {
-	let numRowsNeeded = Math.pow(2, desiredNumBits) + 1; // + 1 being for the header
-
-	tableRef.dataset.rows = addRows(tableRef, parseInt(tableRef.dataset.rows), numRowsNeeded);
-	addIndexCols(tableRef, parseInt(tableRef.dataset.rows));
-	addHeaderCols(tableRef, desiredNumBits, desiredNumOutputs);
-	//addBitCols(tableRef, currNumBits, desiredNumBits);
-	//addOutputCols(tableRef, numBits, numOutputs);
-}
-
-function addHeaderCols(tableRef, numBits, numOutputs) {
-	let currNumHeaderCols = tableRef.rows[0].cells.length;
-	let desiredNumHeaderCols = numBits + numOutputs + 1; // 1 being the first empty cell
-
-	for (i = 1; i <= numBits; i++) { //ignore cell 0
-		if (i >= currNumHeaderCols) { // Col does not currently exist
-			let newCell = tableRef.rows[0].insertCell(i);
-			newCell.outerHTML = "<th>" + getCorrespondingLetter(i) + "</th>";
-		} else { // Col exists
-			tableRef.rows[0].cells[i].outerHTML = "<th>" + getCorrespondingLetter(i) + "</th>"
-		}
-	}
-// TODO dataset Attribute not working propertly??
-	for (i = numBits+1; i < numOutputs+numBits+1; i++) {
-		let subscriptText = "<span style=\"border: none; font-size: 50%; vertical-align: text-bottom\">" +  (i - numBits) + "</span>";
-		//let subscriptText = "<span style=\"border: none\">" +  (i - numBits) + "</span>";
-		let outputOuterHTMLText = "<th style=\" letter-spacing: -5px\">y" + subscriptText  + "</th>";
-		if (i >= currNumHeaderCols) { //Col does not currently exist
-			let newCell = tableRef.rows[0].insertCell(-1);
-			newCell.outerHTML = outputOuterHTMLText;
-			newCell.setAttribute("data-outputNum", i - numBits);
-			console.log("first");
-		} else {
-			tableRef.rows[0].cells[i].outerHTML = outputOuterHTMLText;
-			tableRef.rows[0].cells[i].setAttribute("data-outputNum", i - numBits);
-			console.log("second");
-		}
-			console.log(tableRef.rows[0].cells[i].dataset.outputNum);
-	}
-}
+				addBinaryValues(tableRef);
+				addOutputTextFields(tableRef);
+			}
 		</script>
 	</body>
 </html>

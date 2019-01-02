@@ -13,98 +13,194 @@ function ensureValidBounds(Id, minRange, maxRange) {
 	}
 }
 
-function ensureValidOutput(Id) {
+function ensureValidOutputCellText(cellTextRef) {
 	var outputRegEx = /[0-1x]/;
-	if (!outputRegEx.test(document.getElementById(Id).value)) {
-		if (document.getElementById(Id).value == 'X') {
-			document.getElementById(Id).value = 'x';
+	if (!outputRegEx.test(cellTextRef.value)) {
+		if (cellTextRef.value == 'X') {
+			cellTextRef.value = 'x';
+		} else if (cellTextRef.length() > 1) {
+			cellTextRef.value = cellTextRef.value[0];
+			ensureValidOutputCellText(cellTextRef.value);
 		} else {
-			document.getElementById(Id).value = 0;
+			cellTextRef.value = 0;
+		}
+	} 
+}
+
+function addBitCols(tableRef, numBits) {
+	for (i = 1; i < tableRef.rows.length; i++) { // for each row ...
+		for (j = 0; j < numBits; j++) {
+			let newCol = tableRef.rows[i].insertCell(1);
+			newCol.setAttribute("data-bitindex", j);
 		}
 	}
 }
 
-function removeRows(tableRef, currNumRows, desiredNumRows) {
-	// Insert a row at the end of the table, and grab reference to given row
-	for (i = currNumRows; i > desiredNumRows; i--) {
-		//      tableRef.deleteRow(parseInt(tableRef.rows.length)-1);
-		tableRef.deleteRow(i-1);
-	}
-	return desiredNumRows;
-
-}
-
-function addRows(tableRef, numRows, desiredNumRows) { 
-	for (i = numRows; i < desiredNumRows; i++) {
-		let newRow = tableRef.insertRow(-1); // -1 parameter denotes end of table
-		let colCountAttribute = document.createAttribute("data-cols");
-		colCountAttribute.value = 0;
-		newRow.setAttributeNode(colCountAttribute);
-	}
-	return desiredNumRows;
-}
-
-function removeBitCols(tableRef, numBits, numOutputs) {
-	let desiredNumCols = numBits + numOutputs + 1; // Add 1 for index cell 
-	for (currRow = 0; currRow < tableRef.rows.length; currRow++) { // for each row ...
-		let currNumCols = tableRef.rows[currRow].cells.length;
-		// Each row may not necessarily need the same numCols removed 
-		for (col = currNumCols; col > desiredNumCols; col--) {
-			tableRef.rows[currRow].deleteCell(1);
+function addOutputCols(tableRef, numBits, numOutputs) {
+	for (i = 1; i < tableRef.rows.length; i++) { // for each row ...
+		for (j = numBits; j < numBits+numOutputs; j++) {
+			tableRef.rows[i].insertCell(-1);
+			tableRef.rows[i].cells[tableRef.rows[i].cells.length-1].setAttribute("data-outputnum", j); 
 		}
 	}
-}
-
-function addIndexCols(tableRef, numRows) {
-	for (i = 0; i < numRows; i++) {
-		if (!indexCellsExists(tableRef, i)) {
-			tableRef.rows[i].dataset.cols = 1;
-			let indexNode = document.createElement("th");
-			indexNode.innerHTML = i;
-			tableRef.rows[i].appendChild(indexNode);
-		}
-	}
-}
-
-function indexCellsExists(tableRef, index) {
-	return (parseInt(tableRef.rows[index].dataset.cols) != 0);
-}
-
-
-function addBitCols(tableRef, currNumBits, desiredNumBits) {
-	for (row = 0; row < tableRef.rows.length; row++) { // for each row ...
-		for (i = currNumBits; i < desiredNumBits; i++) {
-			tableRef.rows[row].insertCell(1);
-		}
-	}
-}
-
-function addOutputCols(tableRef, numBits, desiredNumOutputs) {
-	let currNumOutputs = tableRef.rows[0].cells.length - (numBits + 1);
-	for (row = 0; row < tableRef.rows.length; row++) { // for each row ...
-		for (i = currNumOutputs; i < desiredNumOutputs; i++) {
-			tableRef.rows[row].insertCell(i);
-		}
-	}
-
 }
 
 function textFieldFocusOut() {
+	// Removes all table elememnts, then reAdds everything  
+	// Might not be the best solution? But easy to implement.
+	// Plus, considering its only a few elements its not like speeds an issue.
 	let tableRef = document.getElementById("truth-table");
 	
 	let numBits = parseInt(document.getElementById("nBits").value);
 	let numOutputs = parseInt(document.getElementById("nOutputs").value);
 
 	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
-	if (parseInt(tableRef.dataset.rows) > desiredNumRows) {
-		tableRef.dataset.rows = removeRows(tableRef, parseInt(tableRef.dataset.rows), desiredNumRows);
-		//removeBitCols(tableRef, numBits, numOutputs);
-	} else if (parseInt(tableRef.dataset.rows.length) < desiredNumRows) {
-		tableRef.dataset.rows = addRows(tableRef, parseInt(tableRef.dataset.rows), desiredNumRows);
-		addIndexCols(tableRef, tableRef.dataset.rows); // currNumRows acts like the previous amount of rows here
-		addHeaderCols(tableRef, numBits, numOutputs);
-		//addBitCols(tableRef, numBits, numOutputs);
+
+	removeAllRowsCols(tableRef);
+
+	addRows(tableRef,desiredNumRows);
+	addIndexCols(tableRef); // currNumRows acts like the previous amount of rows here
+	addHeaderCols(tableRef, numBits, numOutputs);
+	addBitCols(tableRef, numBits);
+	addOutputCols(tableRef, numBits, numOutputs);
+
+	addBinaryValues(tableRef);
+	addOutputTextFields(tableRef);
+
+	//addStickyHeader(tableRef);
+	
+}
+function addStickyHeader(tableRef) {
+	// TODO: Try to make header sticky!!!
+	let stickyHeader = document.createElement("table");
+	stickyHeader.insertRow(-1);
+	for (i = 1; i < tableRef.rows[0].cells.length; i++) {
+		let node = document.createElement("text");
+		node.classList.add("standard-border");
+		node.innerHTML = tableRef.rows[0].cells[i].innerHTML;
+		stickyHeader.rows[0].appendChild(node);
 	}
+	stickyHeader.classList.add("table-border");
+	//stickyHeader.classList.add("standard-border");
+	document.body.appendChild(stickyHeader);
+	
+}
+
+function addBinaryValues(tableRef) {
+	var count = 0;
+	for (i = 1; i < tableRef.rows.length; i++) {
+		for (j = 1; j < tableRef.rows[i].cells.length; j++) {
+			// lmao yes, using strings are the best way to represent binary in JS for some reason
+			let bitValue = (count).toString(2); // (base 2)
+			if (tableRef.rows[i].cells[j].dataset.bitindex != null) {
+				let index = tableRef.rows[i].cells[j].dataset.bitindex;
+				let value = bitValue[index];
+				debugger;
+				if (typeof value === "undefined") {
+					tableRef.rows[i].cells[j].innerHTML = 0;
+				} else {				
+					tableRef.rows[i].cells[j].innerHTML = bitValue[(bitValue.length-1)-index];
+				}
+			}
+		}
+		count++;
+	}
+}
+
+function addOutputTextFields(tableRef) {
+	for (i = 1; i < tableRef.rows.length; i++) {
+		for (j = 1; j < tableRef.rows[i].cells.length; j++) {
+			if (tableRef.rows[i].cells[j].dataset.outputnum != null) {
+				let textField = document.createElement("input");
+				textField.type = "text";
+				textField.className = "input";
+				textField.value = 0;
+				textField.addEventListener("focusout", function() {
+					ensureValidOutputCellText(textField);
+				});
+				tableRef.rows[i].cells[j].appendChild(textField);
+			
+			}
+		}
+	}
+}
+
+function removeAllRowsCols(tableRef) {
+	while(tableRef.rows.length > 0) {
+		tableRef.deleteRow(0);
+	}
+}
+
+function addRows(tableRef, desiredNumRows) { 
+	// always starts at 0
+	tableRef.insertRow(-1); // header
+	for (i = 1; i < desiredNumRows; i++) {
+			tableRef.insertRow(-1); // -1 parameter denotes end of table
+	}
+}
+
+function addIndexCols(tableRef) {
+	let numRows = tableRef.rows.length;
+	for (i = 0; i < numRows; i++) {
+		if (!indexCellsExists(tableRef, i)) {
+			let indexNode = document.createElement("th");
+			if (i != 0) {
+				indexNode.innerHTML = i-1;
+			} else {
+				indexNode.innerHTML= "\#";
+				
+			}
+			tableRef.rows[i].appendChild(indexNode);
+		}
+	}
+}
+
+function addHeaderCols(tableRef, numBits, numOutputs) {
+	let currNumHeaderCols = tableRef.rows[0].cells.length;
+	let desiredNumHeaderCols = numBits + numOutputs + 1; // 1 being the first empty cell
+
+        for (i = 1; i <= numBits; i++) { //ignore cell 0
+		if (i >= currNumHeaderCols) { // Col does not currently exist
+			let newCell = tableRef.rows[0].insertCell(i);
+			tableRef.rows[0].cells[i].outerHTML = "<th>" + getCorrespondingLetter(i) + "</th>";
+                        tableRef.rows[0].cells[i].setAttribute("data-bitindex", i-1);
+		} else { // Col 
+			tableRef.rows[0].cells[i].outerHTML = "<th>" + getCorrespondingLetter(i) + "</th>"
+                        tableRef.rows[0].cells[i].setAttribute("data-bitindex", i-1);
+		}
+	}
+	for (i = numBits+1; i < numOutputs+numBits+1; i++) {
+		let subscriptText = "<span style=\"border: none; font-size: 50%; vertical-align: text-bottom\">" +  (i - numBits) + "</span>";
+                let outputOuterHTMLText = "<th style=\" letter-spacing: -5px\">y" + subscriptText  + "</th>";
+                if (i >= currNumHeaderCols) { //Col does not currently exist
+                	tableRef.rows[0].insertCell(-1);
+                        tableRef.rows[0].cells[i].outerHTML = outputOuterHTMLText;
+                        tableRef.rows[0].cells[i].setAttribute("data-outputnum", i - numBits);
+		} else {
+			tableRef.rows[0].cells[i].outerHTML = outputOuterHTMLText;
+                        tableRef.rows[0].cells[i].setAttribute("data-outputnum", i - numBits);
+		}
+	}
+		/*document.onscroll = function() {
+			let rows = document.getElementById("truth-table").rows;
+			for (i = 1; i < rows.length; i++) {
+				debugger;
+				let offset = rows[0].cells[i].offsetTop;
+				console.log(offset);
+				let sticky = offset;
+				if (document.pageYOffset >= sticky) {
+					tableRef.rows[0].cells[i].classList.add("sticky")
+				} else {
+					tableRef.rows[0].cells[i].classList.remove("sticky")
+				}
+			};
+		}
+*/
+
+}
+
+function indexCellsExists(tableRef, index) {
+	return (parseInt(tableRef.rows[index].cells.length) != 0);
 }
 
 function getCorrespondingLetter(num) {
