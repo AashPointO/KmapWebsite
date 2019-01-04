@@ -12,12 +12,12 @@
 				<div>
 					<p id="input-text-fields" class="standard-border"> 
 					numBits:  <input type="number" id="nBits"
-						       value=2 min=2 max=4
+						       value=2 min=2 max=4 maxLength = 1
 						       onfocusout="ensureValidBounds('nBits', 2, 4)">
 					<br>
 					<br>
 					numOutputs:  <input type="number" id="nOutputs"
-							 value=1 min=1 max=8 
+							 value=1 min=1 max=8 maxLength = 1
 							 onfocusout="ensureValidBounds('nOutputs', 1, 8)">
 					</p>
 				</div>
@@ -32,35 +32,78 @@
 				<hr>
 				<br>
 
-				<div class="flex-container" id="outputs-container" data-numtables="0" >
+				<div class="flex-container" id="outputs-container">
 				</div>
 			</div>
 		</div>
 		<script>
-			let tableRef = document.getElementById("truth-table");
+			var tableRef = document.getElementById("truth-table");
 			let outputsContainer = document.getElementById("outputs-container");
 			let desiredNumBits = parseInt(document.getElementById("nBits").value);
 			let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 
-			initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs);
+			tableRef = initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs);
 			
-			document.getElementById("nBits").addEventListener("focusout", textFieldFocusOut);
-			document.getElementById("nOutputs").addEventListener("focusout", textFieldFocusOut);
+			outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
+			addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
+			assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
 
+			document.getElementById("nBits").addEventListener("focusout", nBitsTextFieldFocusOut);
+			document.getElementById("nOutputs").addEventListener("focusout", nOutputsTextFieldFocusOut);
+			
 			function initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs) {
-				let numRowsNeeded = Math.pow(2, desiredNumBits) + 1; // + 1 being for the header
+				tableRef = resizeRows(tableRef, desiredNumBits);
 
-				addRows(tableRef, numRowsNeeded);
-				addIndexCols(tableRef, parseInt(tableRef.rows.length));
-				addHeaderCols(tableRef, desiredNumBits, desiredNumOutputs);
+				tableRef = resizeIndexCols(tableRef);
 
-				addBitCols(tableRef, desiredNumBits);
-				addOutputCols(tableRef, desiredNumBits, desiredNumOutputs);
+				tableRef = resizeBitCols(tableRef, desiredNumBits);
+				tableRef = resizeOutputCols(tableRef, desiredNumOutputs);
+				
+				tableRef = assignBitsToTable(tableRef);
+				tableRef = addOutputColTextFieldsToTable(tableRef);
+				
+				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
+				
 
-				addBinaryValues(tableRef);
-				addOutputTextFields(tableRef);
+				return tableRef;
+			}
 
-				addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
+			function nBitsTextFieldFocusOut() {
+				var tableRef = document.getElementById("truth-table");
+				let desiredNumBits = parseInt(document.getElementById("nBits").value);
+				let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
+				let outputsContainer = document.getElementById("outputs-container");
+				outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
+
+				tableRef = resizeRows(tableRef, desiredNumBits);
+				tableRef = resizeIndexCols(tableRef);
+
+				tableRef = resizeBitCols(tableRef, desiredNumBits);
+				tableRef = resizeOutputCols(tableRef, desiredNumOutputs);
+
+				tableRef = assignBitsToTable(tableRef);
+				tableRef = addOutputColTextFieldsToTable(tableRef);
+
+				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
+				outputsContainer = addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
+				
+				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
+			}
+			
+			function nOutputsTextFieldFocusOut() {
+				var tableRef = document.getElementById("truth-table");
+				let desiredNumBits = parseInt(document.getElementById("nBits").value);
+				let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
+				let outputsContainer = document.getElementById("outputs-container");
+				outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
+
+				tableRef = resizeOutputCols(tableRef, desiredNumOutputs);
+				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
+				tableRef = addOutputColTextFieldsToTable(tableRef);
+				outputsContainer = addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
+
+				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
+
 			}
 
 		</script>
