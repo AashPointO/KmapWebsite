@@ -44,7 +44,7 @@ html, html * {
 	text-align: center;
 }
 
-#truth-table * {
+#truth-table *, .table-border * {
 	padding: 5px;
 	font-size: 100%;
 	border-style: solid;
@@ -71,9 +71,14 @@ html, html * {
 	background-color: rgba(0, 0, 0, .025);
 }
 
-.flex-container {
+.flex-container-single-output {
 	display: flex;
 	flex-flow: row wrap;
+}
+
+.flex-container-all-outputs {
+	display: flex;
+	flex-flow: col wrap;
 	align-items: left;
 	justify-content: space-between;
 	margin: -10px;

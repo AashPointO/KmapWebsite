@@ -15,16 +15,15 @@ function ensureValidBounds(Id, minRange, maxRange) {
 
 function ensureValidOutputCellText(cellTextRef) {
 	var outputRegEx = /[0-1x]/;
+	// only allowing first char:
+	cellTextRef.value = cellTextRef.value[0]; 
 	if (!outputRegEx.test(cellTextRef.value)) {
 		if (cellTextRef.value == 'X') {
 			cellTextRef.value = 'x';
-		} else if (cellTextRef.length() > 1) {
-			cellTextRef.value = cellTextRef.value[0];
-			ensureValidOutputCellText(cellTextRef.value);
 		} else {
 			cellTextRef.value = 0;
 		}
-	} 
+	}  
 }
 
 function addBitCols(tableRef, numBits) {
@@ -50,15 +49,19 @@ function textFieldFocusOut() {
 	// Might not be the best solution? But easy to implement.
 	// Plus, considering its only a few elements its not like speeds an issue.
 	let tableRef = document.getElementById("truth-table");
-	let kMapContainerRef = document.getElementById("k-map-container");
+	let outputsContainer = document.getElementById("outputs-container");
 	
 	let numBits = parseInt(document.getElementById("nBits").value);
 	let numOutputs = parseInt(document.getElementById("nOutputs").value);
 
 	let desiredNumRows = Math.pow(2, numBits) + 1; // header counts as a row as well
 
+	// When numOutputs are changed, you don't have to reEnter outputs you already have
+	var outputCellIndices = grabOutputCellIndices(tableRef);
+	let outputCols = grabOutputValues(tableRef, outputCellIndices);
+
 	removeAllRowsCols(tableRef);
-	kMapContainerRef.innerHTML = ""; // Removes all contents of the kMapContainer
+	outputsContainer.innerHTML = ""; // Removes all contents of the outputContainer
 
 	addRows(tableRef,desiredNumRows);
 	addIndexCols(tableRef); // currNumRows acts like the previous amount of rows here
@@ -69,12 +72,47 @@ function textFieldFocusOut() {
 	addBinaryValues(tableRef);
 	addOutputTextFields(tableRef);
 	
-	addAllKmaps(kMapContainerRef, numBits, numOutputs);
+	outputCellIndices = grabOutputCellIndices(tableRef);// output cellIndices will be diff if less outputs
+	setOutputTextFieldsToPreviousValues(tableRef, outputCols, outputCellIndices);
+	
+	
+	debugger;
+	addAllKMapOutputs(outputsContainer, numBits, numOutputs);
 
 	document.getElementById("html")
 
 	//addStickyHeader(tableRef);
 	
+}
+function setOutputTextFieldsToPreviousValues(tableRef, outputValues, outputCellIndices) {
+	debugger;
+	for (i = 0; i < outputCellIndices.length; i++) {
+		let index = outputCellIndices[i];
+		for (j = 1; j < tableRef.rows.length; j++) {
+			tableRef.rows[j].cells[index].firstElementChild.value = outputValues[index,j-1];
+		}
+	}
+}
+
+function grabOutputCellIndices(tableRef) {
+	var outputCellIndices = new Array();
+	for (i = 0; i < tableRef.rows[0].cells.length; i++) {
+		if (tableRef.rows[0].cells[i].dataset.outputnum != null) {
+			outputCellIndices.push(i);	
+		}
+	}
+	return outputCellIndices;
+}
+
+function grabOutputValues(tableRef, outputCellIndices) { 
+	var outputArrayValues = new Array(); 
+	for (i = 0; i < outputCellIndices.length; i++) {
+		let index = outputCellIndices[i];
+		for (j = 1; j < tableRef.rows.length; j++) {
+			outputArrayValues[i,j-1] = tableRef.rows[j].cells[index].firstElementChild.value;
+		}
+	}
+	return outputArrayValues;
 }
 
 function addStickyHeader(tableRef) {
@@ -122,6 +160,7 @@ function addOutputTextFields(tableRef) {
 				textField.className = "input";
 				textField.value = 0;
 				textField.addEventListener("focusout", function() {
+					debugger;
 					ensureValidOutputCellText(textField);
 				});
 				tableRef.rows[i].cells[j].appendChild(textField);
@@ -204,40 +243,126 @@ function addHeaderCols(tableRef, numBits, numOutputs) {
 
 }
 
-function addAllKmaps(kMapContainer, numBits, numOutputs) {
+function addAllKMapOutputs(outputContainer, numBits, numOutputs) {
 	 for (i = 0; i < numOutputs; i++) {
-		 kMapContainer.appendChild(generateKMapTable(numBits, i));
-		 kMapContainer.dataset.numtables = i+1;
+		 let singleOutputContainer = document.createElement("div");
+		 singleOutputContainer.classList.add("flex-container-single-output");
+		 singleOutputContainer.appendChild(generateKMapTable(numBits, i));
+	
+		 // TODO:: Append SOP and POS to singleOutptuContainer
+		
+		 outputContainer.appendChild(singleOutputContainer);
+		 outputContainer.dataset.numtables = i+1;
 	 }
-		 console.log(kMapContainer.dataset.numtables);
 }
 
 function generateKMapTable(numBits, outputIndex) {
 	let kMapTable = document.createElement("TABLE");
         kMapTable.classList.add("table-border");
         kMapTable.classList.add("standard-border");
-	kMapTable.setAttribute("id", "k" + outputIndex);
-        kMapTable.insertRow(0);
-        kMapTable.insertRow(1);
-        kMapTable.rows[0].insertCell(0);
-        kMapTable.rows[0].insertCell(1);
-        kMapTable.rows[1].insertCell(0);
+	kMapTable.setAttribute("id", "y" + outputIndex);
+	
+	let subscriptText = "<span style=\"border: none; font-size: 50%; vertical-align: text-bottom\">" +  (outputIndex+1) + "</span>";
+	let tableTitle = "<th style=\" letter-spacing: -5px\">y" + subscriptText  + "</th>";
 
-	//kMapTable.rows[1].cells[0].style.transform = "rotate(" + -90 + "deg)"; //rotattion!
-	kMapTable.rows[0].cells[0].outerHTML = "<th> y" + (outputIndex+1) + "</th>";
-        
 	switch (numBits) {
 		case 2:
+			// 4 * 4 table //
+			for (k = 0; k < 4; k++) {
+				let newRow = kMapTable.insertRow(0);
+				var numCells;
+
+				if (k == 3) {
+					var numCells = 2;
+				} else if (k == 2) {
+					var numCells = 4;
+				} else {
+					numCells = 3;
+				}
+					for (j = 0; j < numCells; j++) {
+						newRow.insertCell(0);
+				}
+			}
+
+			kMapTable.rows[0].cells[0].outerHTML = tableTitle;
 			kMapTable.rows[0].cells[1].outerHTML = "<th>A</th>";
 			kMapTable.rows[1].cells[0].outerHTML = "<th>B</th>";
+			kMapTable.rows[0].cells[1].colSpan = 3;
+			kMapTable.rows[1].cells[0].rowSpan = 3;
+			
+			kMapTable.rows[2].cells[0].innerHTML = "0";
+			kMapTable.rows[3].cells[0].innerHTML = "1";
+
+			kMapTable.rows[1].cells[2].innerHTML = "0";
+			kMapTable.rows[1].cells[3].innerHTML = "1";
+
 			break;
+
                 case 3:
+			for (k = 0; k < 4; k++) {
+				let newRow = kMapTable.insertRow(0);
+				var numCells;
+
+				if (k == 3) {
+					var numCells = 2;
+				} else if (k == 2) {
+					var numCells = 6;
+				} else {
+					numCells = 5;
+				}
+					for (j = 0; j < numCells; j++) {
+						newRow.insertCell(0);
+				}
+			}
+
+			kMapTable.rows[0].cells[0].outerHTML = tableTitle;
 			kMapTable.rows[0].cells[1].outerHTML = "<th>AB</th>";
 			kMapTable.rows[1].cells[0].outerHTML = "<th>C</th>";
+			kMapTable.rows[0].cells[1].colSpan = 5;
+			kMapTable.rows[1].cells[0].rowSpan = 3;
+			
+			kMapTable.rows[1].cells[2].innerHTML = "00";
+			kMapTable.rows[1].cells[3].innerHTML = "01";
+			kMapTable.rows[1].cells[4].innerHTML = "11";
+			kMapTable.rows[1].cells[5].innerHTML = "10";
+			
+			kMapTable.rows[2].cells[0].innerHTML = "0";
+			kMapTable.rows[3].cells[0].innerHTML = "1";
+
 			break;
                 case 4:
+			for (k = 0; k < 6; k++) {
+				let newRow = kMapTable.insertRow(0);
+				var numCells;
+
+				if (k == 5) {
+					var numCells = 2;
+				} else if (k == 4) {
+					var numCells = 6;
+				} else {
+					numCells = 5;
+				}
+					for (j = 0; j < numCells; j++) {
+						newRow.insertCell(0);
+				}
+			}
+			debugger;
+
+			kMapTable.rows[0].cells[0].outerHTML = tableTitle;
 			kMapTable.rows[0].cells[1].outerHTML = "<th>AB</th>";
 			kMapTable.rows[1].cells[0].outerHTML = "<th>CD</th>";
+			kMapTable.rows[0].cells[1].colSpan = 5;
+			kMapTable.rows[1].cells[0].rowSpan = 5;
+			
+			kMapTable.rows[1].cells[2].innerHTML = "00";
+			kMapTable.rows[1].cells[3].innerHTML = "01";
+			kMapTable.rows[1].cells[4].innerHTML = "11";
+			kMapTable.rows[1].cells[5].innerHTML = "10";
+			
+			kMapTable.rows[2].cells[0].innerHTML = "00";
+			kMapTable.rows[3].cells[0].innerHTML = "01";
+			kMapTable.rows[4].cells[0].innerHTML = "00";
+			kMapTable.rows[5].cells[0].innerHTML = "01";
 			break;
 	}
 	return kMapTable;

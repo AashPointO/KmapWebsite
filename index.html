@@ -32,22 +32,22 @@
 				<hr>
 				<br>
 
-				<div class="flex-container" id="k-map-container" data-numtables="0" >
+				<div class="flex-container" id="outputs-container" data-numtables="0" >
 				</div>
 			</div>
 		</div>
 		<script>
 			let tableRef = document.getElementById("truth-table");
-			let kMapContainerRef = document.getElementById("k-map-container");
+			let outputsContainer = document.getElementById("outputs-container");
 			let desiredNumBits = parseInt(document.getElementById("nBits").value);
 			let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 
-			initTruthTable(tableRef, kMapContainerRef, desiredNumBits, desiredNumOutputs);
+			initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs);
 			
 			document.getElementById("nBits").addEventListener("focusout", textFieldFocusOut);
 			document.getElementById("nOutputs").addEventListener("focusout", textFieldFocusOut);
 
-			function initTruthTable(tableRef, kMapContainerRef, desiredNumBits, desiredNumOutputs) {
+			function initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs) {
 				let numRowsNeeded = Math.pow(2, desiredNumBits) + 1; // + 1 being for the header
 
 				addRows(tableRef, numRowsNeeded);
@@ -60,7 +60,7 @@
 				addBinaryValues(tableRef);
 				addOutputTextFields(tableRef);
 
-				addAllKmaps(kMapContainerRef, desiredNumBits, desiredNumOutputs);
+				addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
 			}
 
 		</script>
