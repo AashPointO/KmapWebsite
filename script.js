@@ -310,10 +310,12 @@ function generateSOPFormDivNode(variableList) {
 	let nodeSOP = document.createElement("div");
 	
 	let titleNode = document.createElement("p");
-	titleNode.innerHTML = "SOP Canonical Form: ";
+	titleNode.innerHTML = "SOP Prime Implicants: ";
 
 	let canonicalForm = document.createElement("p");
 	let innerText = "= ";
+	var addedVariables = new Array();
+	
 	if (variableList[0].length == 0) {
 		innerText = innerText.concat(0);	
 	} else {
@@ -325,9 +327,12 @@ function generateSOPFormDivNode(variableList) {
 				var text = "";
 					if (variableList[k][i].isInLargestSubGroup) {
 						for (var j = 0; j < variableList[k][i].variables.length; j++) {
+							if (!addedVariables.includes(variableList[k][i].variables[j])) {
 								text = text.concat(variableList[k][i].variables[j]);
+								addedVariables.push(variableList[k][i].variables[j]);
+								innerText = innerText.concat(text + " + ");
+							}
 						}
-						innerText = innerText.concat(text + " + ");
 					}
 			}
 		}
@@ -551,113 +556,6 @@ switch (index) {
 // *** SOP/POS Algorithms *** //
 // ************************** //
 
-function sampleGetTwoDimensionalArray() {
-// char[i,j]
-var table = new Array();
-
-return table;
-
-}
-
-function grabPointFromDecimalValue(decimalValue, numBits, row, col) {
-var point;
-switch (numBits) {
-	case 2:
-		switch (decimalValue) {
-				// col, row
-			case 0:
-				point = new Point(0, 1);
-				return point;
-			case 1: 
-				point = new Point(0, 0);
-				return point;
-			case 2:
-				point = new Point(1, 1);
-				return point;
-			case 3:
-				point = new Point(1, 0);
-				return point;
-		}
-	case 3:
-		switch (decimalValue) {
-			case 0:
-				point = new Point(0, 1);
-				return point;
-			case 1:
-				point = new Point(0, 0);
-				return point;
-			case 2: 
-				point = new Point(1, 1);
-				return point;
-			case 3:
-				point = new Point(1, 0);
-				return point;
-			case 4:
-				point = new Point(3, 1);
-				return point;
-			case 5:
-				point = new Point(3, 0);
-				return point;
-			case 6:
-				point = new Point(2, 1);
-				return point;
-			case 7:
-				point = new Point(2, 0);
-				return point;
-		}
-	case 4:
-		switch (decimalValue) {
-			case 0:
-				point = new Point(0, 3);
-				return point;
-			case 1:
-				point = new Point(0, 2);
-				return point;
-			case 2: 
-				point = new Point(0, 0);
-				return point;
-			case 3:
-				point = new Point(0, 1);
-				return point;
-			case 4:
-				point = new Point(1, 3);
-				return point;
-			case 5:
-				point = new Point(1, 2);
-				return point;
-			case 6:
-				point = new Point(1, 0);
-				return point;
-			case 7:
-				point = new Point(1, 1);
-				return point;
-			case 8:
-				point = new Point(3, 3);
-				return point;
-			case 9:
-				point = new Point(3, 2);
-				return point;
-			case 10:
-				point = new Point(3, 0);
-				return point;
-			case 11: 
-				point = new Point(3, 1);
-				return point;
-			case 12:
-				point = new Point(2, 3);
-				return point;
-			case 13:
-				point = new Point(2, 2);
-				return point;
-			case 14:
-				point = new Point(2, 0);
-				return point;
-			case 15:
-				point = new Point(2, 1);
-				return point;
-		}
-	}
-}
 function grabVariablesFromDecimalValue(decimalValue, numBits) {
 // TODO FIND BETTER WAY TO ORGANIZE THIS STUFF
 switch (numBits) {
@@ -736,7 +634,6 @@ switch (numBits) {
 function getImplicantsFromKMap(kMapTable, numBits, desiredValue) {
 
 	var size = 1;
-debugger;
 	var implicantList = new Array();
 	for (var i = kMapTable.rows.length-1; i >= 0; i--) {
 		for (var k = 0; k < kMapTable.rows[i].cells.length; k++) {
@@ -770,6 +667,7 @@ function returnPrimeAdjacencyList(implicantList, numBits) {
 	primeAdjacencyListBySize[4] = new Array();
 
 	for (var r = 0; r < primeAdjacencyListBySize.length; r++) {
+		debugger;
 		for (var i = 0; i < primeAdjacencyListBySize[r].length; i++) {
 
 			let primeImplicant1 = primeAdjacencyListBySize[r][i];	
@@ -789,6 +687,7 @@ function returnPrimeAdjacencyList(implicantList, numBits) {
 			}
 		}
 	}
+
 	return primeAdjacencyListBySize;
 }
 			
@@ -796,14 +695,12 @@ function returnPrimeAdjacencyList(implicantList, numBits) {
 function combinePrimeImplicants(implicant1, implicant2) {
 	var variables = new Array();
 	// Removes the one variable that differs:
-	debugger;
 	for (var i = 0; i < implicant1.variables.length; i++) {
 		if (implicant2.variables.includes(implicant1.variables[i])) {
 			variables.push(implicant1.variables[i]);
 		}
 	}
 	if (variables.length == 0) {
-		debugger;
 		variables.push("1");
 	}
 	return new PrimeImplicant(implicant1.size*2, variables);
@@ -862,6 +759,7 @@ function PrimeImplicant(size, variables) {
 		}
 	}
 }
+
 
 function areComplements(char1, char2) {
 	if ((char1[0] == char2[0]) && (char1.length != char2.length)) {

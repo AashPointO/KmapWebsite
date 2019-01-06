@@ -2,8 +2,9 @@
 
 html {
 	height: 100%;
-	background-repeat: no-repeat;
-	background-image: linear-gradient(#8d9ec6, 30%, #247191);
+/*	background-repeat: no-repeat;
+	background-image: linear-gradient(#8d9ec6, 30%, #247191);*/
+	background-color: #11253f;
 }
 
 html, html * {
