@@ -67,15 +67,24 @@ html, html * {
 	border-style: solid;
 	border-color: black;
 	border-radius: 5px;
-	border-width: 2.5px;
+	border-width: 1.5px;
+	padding: 1em;
 	background-color: rgba(0, 0, 0, .025);
 }
+
 
 .flex-container-single-output {
 	display: flex;
 	flex-flow: row wrap;
+	justify-content: space-around;
+	align-items: center;
 }
-
+.flex-container-sop-pos-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+}
 .flex-container-all-outputs {
 	display: flex;
 	flex-flow: col wrap;

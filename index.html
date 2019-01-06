@@ -9,18 +9,17 @@
 		<div id="genBody">
 			<div>
 				<h1> K-Map Generator with Multiple Outputs </h1>
-				<div>
-					<p id="input-text-fields" class="standard-border"> 
-					numBits:  <input type="number" id="nBits"
-						       value=2 min=2 max=4 maxLength = 1
-						       onfocusout="ensureValidBounds('nBits', 2, 4)">
-					<br>
-					<br>
-					numOutputs:  <input type="number" id="nOutputs"
-							 value=1 min=1 max=8 maxLength = 1
-							 onfocusout="ensureValidBounds('nOutputs', 1, 8)">
-					</p>
+				<div id="input-text-fields" class="standard-border"> 
+						numBits:  <input type="number" id="nBits"
+							       value=2 min=2 max=4 maxLength = 1
+							       onfocusout="ensureValidBounds('nBits', 2, 4)">
+						<br>
+						<br>
+						numOut:  <input type="number" id="nOutputs"
+								 value=1 min=1 max=8 maxLength = 1
+								 onfocusout="ensureValidBounds('nOutputs', 1, 8)">
 				</div>
+				<br>
 
 				<table id="truth-table" class="standard-border">
 					<!-- Table is modified entirely onto the truth-table -->
@@ -37,21 +36,18 @@
 			</div>
 		</div>
 		<script>
-			var tableRef = document.getElementById("truth-table");
-			let outputsContainer = document.getElementById("outputs-container");
 			let desiredNumBits = parseInt(document.getElementById("nBits").value);
 			let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 
-			tableRef = initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs);
-			
-			outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
-			addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
-			assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
+			let tableRef = initTruthTable(desiredNumBits, desiredNumOutputs);
+			let outputsContainer = initOutputContainer(desiredNumBits, desiredNumOutputs, tableRef);
 
 			document.getElementById("nBits").addEventListener("focusout", nBitsTextFieldFocusOut);
 			document.getElementById("nOutputs").addEventListener("focusout", nOutputsTextFieldFocusOut);
 			
-			function initTruthTable(tableRef, outputsContainer, desiredNumBits, desiredNumOutputs) {
+			function initTruthTable(desiredNumBits, desiredNumOutputs) {
+				var tableRef = document.getElementById("truth-table");
+
 				tableRef = resizeRows(tableRef, desiredNumBits);
 
 				tableRef = resizeIndexCols(tableRef);
@@ -63,9 +59,47 @@
 				tableRef = addOutputColTextFieldsToTable(tableRef);
 				
 				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
-				
 
 				return tableRef;
+			}
+
+			function initOutputContainer(numBits, numOutputs, tableRef) {
+				var outputsContainer = document.getElementById("outputs-container");
+				outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
+
+				for (var i = 0; i < numOutputs; i++) { // For Each Set of Outputs
+					let singleOutputContainer = document.createElement("div");
+					singleOutputContainer.classList.add("flex-container-single-output");
+
+					/*let solutionSOPPOSContainer = document.createElement("div"); 
+					solutionSOPPOSContainer.classList.add("flex-container-sop-pos-container");
+					solutionSOPPOSContainer.classList.add("standard-border");*/
+					
+					let kMapTable = generateKMapTableNode(numBits, i);
+					singleOutputContainer.appendChild(kMapTable);
+
+					//let textNodePOS = generateSOPFormDivNode();
+					//solutionSOPPOSContainer.appendChild(textNodePOS);
+					
+
+					//singleOutputContainer.appendChild(solutionSOPPOSContainer);
+
+					outputsContainer.appendChild(singleOutputContainer);
+				}
+
+
+				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
+					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
+					let implicantList = getImplicantsFromKMap(kMapTable, numBits, "1");
+					debugger;
+					let variablesList = returnPrimeAdjacencyList(implicantList, numBits)
+					
+					let textNodeSOP = generateSOPFormDivNode(variablesList);
+					outputsContainer.childNodes[i].appendChild(textNodeSOP);
+				}
+
+				
+				return outputsContainer;
 			}
 
 			function nBitsTextFieldFocusOut() {
@@ -85,9 +119,30 @@
 				tableRef = addOutputColTextFieldsToTable(tableRef);
 
 				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
-				outputsContainer = addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
+				
+				// OUTPUT HANDLING::
+				for (var i = 0; i < desiredNumOutputs; i++) { // For Each Set of Outputs
+					let singleOutputContainer = document.createElement("div");
+					singleOutputContainer.classList.add("flex-container-single-output");
+					
+					let kMapTable = generateKMapTableNode(desiredNumBits, i);
+					singleOutputContainer.appendChild(kMapTable);
+
+					outputsContainer.appendChild(singleOutputContainer);
+				}
 				
 				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
+				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
+					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
+					let implicantList = getImplicantsFromKMap(kMapTable, desiredNumBits, "1");
+					debugger;
+					let variablesList = returnPrimeAdjacencyList(implicantList, desiredNumBits)
+					
+					let textNodeSOP = generateSOPFormDivNode(variablesList);
+					outputsContainer.childNodes[i].appendChild(textNodeSOP);
+				
+				}
+				
 			}
 			
 			function nOutputsTextFieldFocusOut() {
@@ -100,9 +155,31 @@
 				tableRef = resizeOutputCols(tableRef, desiredNumOutputs);
 				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
 				tableRef = addOutputColTextFieldsToTable(tableRef);
-				outputsContainer = addAllKMapOutputs(outputsContainer, desiredNumBits, desiredNumOutputs);
+			
+
+				// OUTPUT HANDLING::
+				for (var i = 0; i < desiredNumOutputs; i++) { // For Each Set of Outputs
+					let singleOutputContainer = document.createElement("div");
+					singleOutputContainer.classList.add("flex-container-single-output");
+					
+					let kMapTable = generateKMapTableNode(desiredNumBits, i);
+					singleOutputContainer.appendChild(kMapTable);
+
+					outputsContainer.appendChild(singleOutputContainer);
+				}
 
 				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
+				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
+					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
+					let implicantList = getImplicantsFromKMap(kMapTable, desiredNumBits, "1");
+					debugger;
+
+					let variablesList = returnPrimeAdjacencyList(implicantList, desiredNumBits)
+					let textNodeSOP = generateSOPFormDivNode(variablesList);
+					outputsContainer.childNodes[i].appendChild(textNodeSOP);
+				
+				}
+				
 
 			}
 
