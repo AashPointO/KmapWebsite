@@ -81,19 +81,16 @@
 
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
+
+					let variableListSOP = getSOP_PrimeImplicantsAt(i, tableRef)
+					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
-					let implicantListSOP = getImplicantsFromKMap(kMapTable, desiredNumBits, "1");
-					let implicantListPOS = getImplicantsFromKMap(kMapTable, desiredNumBits, "0");
-					
-					let variablesListSOP = returnPrimeAdjacencyList(implicantListSOP, desiredNumBits)
-					let variablesListPOS = returnPrimeAdjacencyList(implicantListPOS, desiredNumBits)
-					debugger;
-					
-					let textNodeSOP = generateSOPDivNode(variablesListSOP);
-					let textNodePOS = generatePOSDivNode(variablesListPOS);
+					let variableListPOS = getPOS_PrimeImplicantsAt(i, tableRef)
+					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
 
 					outputsContainer.childNodes[i].appendChild(textNodeSOP);
 					outputsContainer.childNodes[i].appendChild(textNodePOS);
+				
 				}
 
 				
@@ -132,20 +129,19 @@
 				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
-
-					let implicantListSOP = getImplicantsFromKMap(kMapTable, desiredNumBits, "1");
-					let implicantListPOS = getImplicantsFromKMap(kMapTable, desiredNumBits, "0");
+				
+					let variableListSOP = getSOP_PrimeImplicantsAt(i, tableRef)
+					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
-					let variablesListSOP = returnPrimeAdjacencyList(implicantListSOP, desiredNumBits)
-					let variablesListPOS = returnPrimeAdjacencyList(implicantListPOS, desiredNumBits)
+					let variableListPOS = getPOS_PrimeImplicantsAt(i, tableRef)
 					debugger;
-					
-					let textNodeSOP = generateSOPDivNode(variablesListSOP);
-					let textNodePOS = generatePOSDivNode(variablesListPOS);
+					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
+
 					outputsContainer.childNodes[i].appendChild(textNodeSOP);
 					outputsContainer.childNodes[i].appendChild(textNodePOS);
 				
 				}
+
 				
 			}
 			
@@ -176,15 +172,12 @@
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
 					
-					let implicantListSOP = getImplicantsFromKMap(kMapTable, desiredNumBits, "1");
-					let implicantListPOS = getImplicantsFromKMap(kMapTable, desiredNumBits, "0");
+					let variableListSOP = getSOP_PrimeImplicantsAt(i, tableRef)
+					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
-					let variablesListSOP = returnPrimeAdjacencyList(implicantListSOP, desiredNumBits)
-					let variablesListPOS = returnPrimeAdjacencyList(implicantListPOS, desiredNumBits)
-					debugger;
-					
-					let textNodeSOP = generateSOPDivNode(variablesListSOP);
-					let textNodePOS = generatePOSDivNode(variablesListPOS);
+					let variableListPOS = getPOS_PrimeImplicantsAt(i, tableRef)
+					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
+
 					outputsContainer.childNodes[i].appendChild(textNodeSOP);
 					outputsContainer.childNodes[i].appendChild(textNodePOS);
 				

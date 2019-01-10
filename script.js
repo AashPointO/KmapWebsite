@@ -1,3 +1,5 @@
+
+
 function checkTextField(fieldId) {
 	var regExCheckBounds = RegExp("[1-5]")
 	if (regEx.test(document.getElementById(fieldId).value)) {
@@ -103,27 +105,6 @@ for (var i = 1; i < tableRef.rows.length; i++) {
 
 return tableRef;
 
-}
-
-function addAutoIndentEventListenersForTable(tableRef) {
-for (var i = 1; i < tableRef.rows.length; i++) {
-	for (var j = 1; j < tableRef.rows[i].cells.length; j++) {
-		var nextRow = i + 1;
-		var nextCol = j;
-		if (nextRow >= tableRef.rows.length) {
-			nextRow = 1;
-			nextCol++;
-			if (nextCol >= tableRef.rows[0].cells.length) {
-				return tableRef;
-			}
-		}
-		if (tableRef.rows[i].cells[j].dataset.outputindex != null) {
-			tableRef.rows[i].cells[j].firstElementChild.addEventListener("focusout", function() {
-				autoIndentOutputTextField(tableRef.rows[i].cells[j].firstElementChild, tableRef.rows[nextRow].cells[nextCol].firstElementChild);
-			});
-		}
-	}
-}
 }
 
 function addOutputColTextFieldsToRow(singleRow) {
@@ -306,97 +287,7 @@ while(tableRef.rows.length > 0) {
 }
 }
 
-function generateSOPDivNode(variableList) {
-	let nodeSOP = document.createElement("div");
-	
-	let titleNode = document.createElement("p");
-	titleNode.innerHTML = "SOP Prime Implicants: ";
 
-	let canonicalForm = document.createElement("p");
-	let innerText = "F = ";
-	var addedVariables = new Array();
-	
-	if (variableList[0].length == 0) {
-		innerText = innerText.concat(0);	
-	} else {
-		for (var k = 0; k < variableList.length; k++) { // For Each Set of Implicants by Variable Size
-			for (var i = 0; i < variableList[k].length; i++) { // output: ~~ + ~~ all same numVars per Implicant
-				if (isOnlyDontCares(variableList[k])) {
-					continue;
-				}
-					if (variableList[k][i].isInLargestSubGroup) { // For Each Implicant:: 
-						var implicantText = "";
-						debugger;
-						for (var j = 0; j < variableList[k][i].variables.length; j++) {
-								implicantText = implicantText.concat(variableList[k][i].variables[j]);
-						}
-								innerText = innerText.concat(implicantText + " + ");
-					}
-			}
-		}
-		innerText = innerText.substring(0,innerText.length-2);
-	}
-	if (innerText == "") {
-		innerText = "F = 0";
-	} else if (innerText.includes(1)) {
-		innerText = "F = 1";
-	}
-	canonicalForm.innerText = innerText;
-	
-	nodeSOP.appendChild(titleNode);
-	nodeSOP.appendChild(canonicalForm);
-
-	return nodeSOP;
-}
-
-function generatePOSDivNode(variableList) {
-	let nodePOS = document.createElement("div");
-	
-	let titleNode = document.createElement("p");
-	titleNode.innerHTML = "POS Prime Implicants: ";
-
-	let canonicalForm = document.createElement("p");
-	let innerText = "F' = ";
-	var addedVariables = new Array();
-	
-	if (variableList[0].length == 0) {
-		innerText = innerText.concat(0);	
-	} else {
-		for (var k = 0; k < variableList.length; k++) { // For Each Set of Implicants by Variable Size
-			for (var i = 0; i < variableList[k].length; i++) { 
-				if (isOnlyDontCares(variableList[k])) {
-					continue;
-				}
-				var text = "";
-					if (variableList[k][i].isInLargestSubGroup) {
-						for (var j = 0; j < variableList[k][i].variables.length; j++) { // output: ( ~ + ~ )
-								if (j == 0) {
-									text = text.concat("(");
-								} else {
-									text = text.concat(" + ");
-								}
-								text = text.concat(variableList[k][i].variables[j]);
-								if (j == (variableList[k][i].variables.length-1)) {
-									text = text.concat(")");
-								}
-							}
-						innerText = innerText.concat(text);
-					}
-			}
-		}
-	}
-	if (innerText == "") {
-		innerText = "F' = 0";
-	} else if (innerText.includes(1)) {
-		innerText = "F' = 1";
-	}
-	canonicalForm.innerText = innerText;
-	
-	nodePOS.appendChild(titleNode);
-	nodePOS.appendChild(canonicalForm);
-
-	return nodePOS;
-}
 
 function generateKMapTableNode(numBits, outputIndex) {
 let kMapTable = document.createElement("TABLE");
@@ -595,214 +486,338 @@ switch (index) {
 // *** SOP/POS Algorithms *** //
 // ************************** //
 
-function grabVariablesFromDecimalValue(decimalValue, numBits) {
-// TODO FIND BETTER WAY TO ORGANIZE THIS STUFF
-switch (numBits) {
-	case 2:
-		switch (decimalValue) {
-			case 0:
-				return new Array("A'", "B'");
-				break;
-			case 1: 
-				return new Array("A'", "B");
-				break;
-			case 2:
-				return new Array("A", "B'");
-				break;
-			case 3:
-				return new Array("A", "B");
-				break;
-		}
-	case 3:
-		switch (decimalValue) {
-			case 0:
-				return new Array("A'", "B'", "C'");
-			case 1:
-				return new Array("A'", "B'", "C");
-			case 2: 
-				return new Array("A'", "B", "C'");
-			case 3:
-				return new Array("A'", "B", "C");
-			case 4:
-				return new Array("A", "B'", "C'");
-			case 5:
-				return new Array("A", "B'", "C");
-			case 6:
-				return new Array("A", "B", "C'");
-			case 7:
-				return new Array("A", "B", "C");
-		}
-	case 4:
-		switch (decimalValue) {
-			case 0:
-				return new Array("A'", "B'", "C'", "D'");
-			case 1:
-				return new Array("A'", "B'", "C'", "D");
-			case 2: 
-				return new Array("A'", "B'", "C", "D'");
-			case 3:
-				return new Array("A'", "B'", "C", "D");
-			case 4:
-				return new Array("A'", "B", "C'", "D'");
-			case 5:
-				return new Array("A'", "B", "C'", "D");
-			case 6:
-				return new Array("A'", "B", "C", "D'");
-			case 7:
-				return new Array("A'", "B", "C", "D");
-			case 8:
-				return new Array("A", "B'", "C'", "D'");
-			case 9:
-				return new Array("A", "B'", "C", "D");
-			case 10:
-				return new Array("A", "B'", "C", "D'");
-			case 11: 
-				return new Array("A", "B'", "C", "D");
-			case 12:
-				return new Array("A", "B", "C'", "D'");
-			case 13:
-				return new Array("A", "B", "C'", "D");
-			case 14:
-				return new Array("A", "B", "C", "D'");
-			case 15:
-				return new Array("A", "B", "C", "D");
-		}
-	}
-}
+function generateSOPDivNodeFor(variableList) {
+	let nodeSOP = document.createElement("div");
+	
+	let titleNode = document.createElement("p");
+	titleNode.innerHTML = "SOP Prime Implicants: ";
 
-function getImplicantsFromKMap(kMapTable, numBits, desiredValue) {
-
-	var size = 1;
-	var implicantList = new Array();
-	for (var i = kMapTable.rows.length-1; i >= 0; i--) {
-		for (var k = 0; k < kMapTable.rows[i].cells.length; k++) {
-			if (kMapTable.rows[i].cells[k].dataset.decimalvalue != null) {
-				if ((kMapTable.rows[i].cells[k].innerText == desiredValue) || (kMapTable.rows[i].cells[k].innerText == 'x')){
-					console.log("i: " + i + " k: " + k + ", value: " + kMapTable.rows[i].cells[k].dataset.decimalvalue);
-					let variables = grabVariablesFromDecimalValue(parseInt(kMapTable.rows[i].cells[k].dataset.decimalvalue), numBits); 
-					let newImplicant = new PrimeImplicant(size,variables);
-					if (kMapTable.rows[i].cells[k].innerText == 'x') {
-						newImplicant.isInLargestSubGroup = false;
-						newImplicant.isDontCare = true;
-					}
-					implicantList.push(newImplicant);
+	let canonicalForm = document.createElement("p");
+	let innerText = "F = ";
+	var addedImplicants = new Array();
+	
+	if ((variableList.length() == 0) || (variableList.length() == variableList.numDontCares())) { // No possible set of inputs
+		innerText = innerText.concat(0);	
+	} else {
+		for (var k = 0; k < variableList.length(); k++) { // For each Implicant
+			let currImplicant = variableList.at(k);
+			if ((!currImplicant.isDontCare) && (currImplicant.isInLargestGroup)) { 
+				var implicantText = currImplicant.generateMinterm();
+				if (!addedImplicants.includes(implicantText)) {
+					innerText = innerText.concat(implicantText);
+					innerText = innerText.concat(" + ");
+					addedImplicants.push(implicantText);
 				}
 			}
 		}
+		innerText = innerText.substring(0,innerText.length-2); // removes last addition sign
+	}
+
+	canonicalForm.innerText = innerText;
+	
+	nodeSOP.appendChild(titleNode);
+	nodeSOP.appendChild(canonicalForm);
+
+	return nodeSOP;
 }
 
-return implicantList;
+function generatePOSDivNodeFor(variableList) {
+	let nodePOS = document.createElement("div");
+	
+	let titleNode = document.createElement("p");
+	titleNode.innerHTML = "POS Prime Implicants: ";
 
-}
-
-function returnPrimeAdjacencyList(implicantList, numBits) {
-	let adjancencyGroupSizes = new Array(1, 2, 4, 8, 16);
-
-	var primeAdjacencyListBySize = new Array(adjancencyGroupSizes.length);
-	primeAdjacencyListBySize[0] = implicantList; // gets all Xs too
-	primeAdjacencyListBySize[1] = new Array();
-	primeAdjacencyListBySize[2] = new Array();
-	primeAdjacencyListBySize[3] = new Array();
-	primeAdjacencyListBySize[4] = new Array();
-
-	for (var r = 0; r < primeAdjacencyListBySize.length; r++) {
-		for (var i = 0; i < primeAdjacencyListBySize[r].length; i++) {
-
-			let primeImplicant1 = primeAdjacencyListBySize[r][i];	
-			for (var j = i+1; j < primeAdjacencyListBySize[r].length; j++) {
-				let primeImplicant2 = primeAdjacencyListBySize[r][j];
-				if ((primeImplicant1.isDontCare) &&  (primeImplicant2.isDontCare)){
-					continue;
-				}
-				if (primeImplicant1.isAdjacentTo(primeImplicant2)) {
-					let newImplicant = combinePrimeImplicants(primeImplicant1, primeImplicant2); 
-					if (!primeAdjacencyListBySize[r+1].includes(newImplicant)) {
-						primeAdjacencyListBySize[r+1].push(newImplicant);
+	let canonicalForm = document.createElement("p");
+	let innerText = "F = ";
+	var addedImplicants = new Array();
+	
+	if (variableList.length() == 0) { // No possible set of inputs
+		innerText = innerText.concat(1);	
+	} else {
+		for (var k = 0; k < variableList.length(); k++) { // For each Implicant
+			let currImplicant = variableList.at(k);
+			if ((!currImplicant.isDontCare) && (currImplicant.isInLargestGroup)) { 
+				var implicantText = currImplicant.generateMaxterm();
+				if (!addedImplicants.includes(implicantText)) {
+					if (implicantText != "0") {
+						innerText = innerText.concat(" ( ");
+						innerText = innerText.concat(implicantText);
+						innerText = innerText.concat(" ) ");
+					} else {
+						innerText = innerText.concat(implicantText);
 					}
-					primeAdjacencyListBySize[r][i].isInLargestSubGroup = false;
-					primeAdjacencyListBySize[r][j].isInLargestSubGroup = false;
+					addedImplicants.push(implicantText);
 				}
 			}
 		}
 	}
+	if (innerText == "F = ") {
+		innerText = innerText.concat("1");
+	}
+	canonicalForm.innerText = innerText;
+	
+	nodePOS.appendChild(titleNode);
+	nodePOS.appendChild(canonicalForm);
 
-	return primeAdjacencyListBySize;
+	return nodePOS;
 }
-			
 
-function combinePrimeImplicants(implicant1, implicant2) {
-	var variables = new Array();
-	// Removes the one variable that differs:
-	for (var i = 0; i < implicant1.variables.length; i++) {
-		if (implicant2.variables.includes(implicant1.variables[i])) {
-			variables.push(implicant1.variables[i]);
+function getSOP_PrimeImplicantsAt(colIndex, tableRef) {
+	let primeImplicantSet = new OutputColSet(colIndex, "1", tableRef);
+	let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
+	let totPossibleNumGroupSizes = numBits + 1;
+
+	primeImplicantSet.grabAllOutputNodesFromTable(tableRef);
+	for (var i = 0; i < primeImplicantSet.length(); i++) {
+		for (var j = i+1; j < primeImplicantSet.length(); j++) {
+			let implicant1 = primeImplicantSet.at(i);
+			let implicant2 = primeImplicantSet.at(j);
+			if (implicant1.isAdjacentTo(implicant2)) {
+				primeImplicantSet.push(implicant1.generateCombinationWith(implicant2));
+				primeImplicantSet.outputSet[i].isInLargestGroup = false;
+				primeImplicantSet.outputSet[j].isInLargestGroup = false;
+			}
 		}
 	}
-	if (variables.length == 0) {
-		variables.push("1");
-	}
-	return new PrimeImplicant(implicant1.size*2, variables);
+	return primeImplicantSet;
 }
 
-function isOnlyDontCares(listPrimeImplicants) {
-	for (var i = 0; i < listPrimeImplicants.length; i++) {
-		if (!listPrimeImplicants[i].isDontCare) {
-			return false;	
+
+function getPOS_PrimeImplicantsAt(colIndex, tableRef) {
+	let primeImplicantSet = new OutputColSet(colIndex, "0", tableRef);
+	let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
+	let totPossibleNumGroupSizes = numBits + 1;
+
+	primeImplicantSet.grabAllOutputNodesFromTable(tableRef);
+	for (var i = 0; i < primeImplicantSet.length(); i++) {
+		for (var j = i+1; j < primeImplicantSet.length(); j++) {
+			let implicant1 = primeImplicantSet.at(i);
+			let implicant2 = primeImplicantSet.at(j);
+			if (implicant1.isAdjacentTo(implicant2)) {
+				primeImplicantSet.push(implicant1.generateCombinationWith(implicant2));
+				primeImplicantSet.outputSet[i].isInLargestGroup = false;
+				primeImplicantSet.outputSet[j].isInLargestGroup = false;
+			}
 		}
 	}
-	return true;
+	return primeImplicantSet;
 }
 
 
-function PrimeImplicant(size, variables) {
-	this.size = size;
-	//this.bottomLeftIndex = bottomLeftIndex; // type (x,y)*/
-	this.variables = variables;
-	this.isDontCare = false;
-	this.isInLargestSubGroup = true;
-	//this.bottomRightIndex = new Point(this.bottomLeftIndex.x + (this.width-1), this.bottomLeftIndex.y);
-	this.hasSameDimensionsAs = function(primeImplicant2) {
-		if ((this.size == primeImplicant2.size) ) {
-				// equal width is implied
+function OutputColSet(outputIndex, valueDesired, tableRef) {
+	// One for SOP, another for POS:: 
+	this.outputIndex = parseInt(outputIndex);
+	// outputSet is of type *OutputGroup
+	this.outputSet = new Array();
+	this.valueDesired = valueDesired;
+
+	this.length = function() {
+		return this.outputSet.length;
+	}
+
+	this.numDontCares = function() {
+		var numDontCares = 0;
+		for (var i = 0; i < this.outputSet.length; i++) {
+			if (this.outputSet[i].isDontCare) {
+				numDontCares++;
+			}
+		}
+		return numDontCares;
+	}
+	
+	this.at = function(index) {
+		return this.outputSet[index];
+	}
+
+	this.grabAllOutputNodesFromTable = function(tableRef) {
+		// OutputCol should be Reset ONLY if numBits is changed
+		// All old values are lost
+		this.outputSet = new Array();
+		// Under assumpion col has dataset-outputindex
+		for (var i = 1; i < tableRef.rows.length; i++) { // Ignoring Header Row
+			var currRow = tableRef.rows[i];
+
+			for (var j = 1; j < currRow.cells.length; j++) {
+
+				if (j >= tableRef.rows[0].cells.length) { // ERROR HANDLING
+					console.error("ERROR AT resetWithNumRowsAt()\nCould not Find ColIndex:" + j);
+				}
+
+				let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
+				let binaryString = decimalToBinary(i-1, numBits); // i-1 b/c row value starts at 0, but index starts at 1
+				var dontCareFlag;
+
+				currCol = tableRef.rows[i].cells[j];
+
+				if (parseInt(currCol.dataset.outputindex) == this.outputIndex) {
+					switch (currCol.firstElementChild.value) {
+						case valueDesired:
+							var dontCareFlag = false;			
+							var outputToPush = new OutputGroup(binaryString, dontCareFlag);
+							this.outputSet.push(outputToPush);
+							break;
+						case "x":
+							var dontCareFlag = true;			
+							var outputToPush = new OutputGroup(binaryString, dontCareFlag);
+							this.outputSet.push(outputToPush);
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		}
+	}
+	
+	this.push = function(outputToPush) {
+		this.outputSet.push(outputToPush);
+	}
+
+	this.getIndexForBinaryString = function(bStringCheckingFor) {
+		for (var i = 0; i < this.outputSet.length; i++) {
+			let currOutput = this.outputSet[i];
+			if (currOutput.correspondingBinaryString == bStringCheckingFor) {
+				return i;
+			}
+		}
+		return -1;
+	}
+}
+	
+function OutputGroup(correspondingBinaryString, isDontCare) {
+	// 1 for HIGH, 0 for LOW
+	// f for FACTOREDOUT; that way numBits stays same
+	// ex: 10f0 === A B' C(factored out) D' 
+	this.correspondingBinaryString = correspondingBinaryString;
+	// boolean
+	// is True if entirety of outputGroup is derived from dontCares
+	this.isDontCare = isDontCare; 
+
+	this.isInLargestGroup = true;
+	this.isEssential = true;
+
+	this.getNumLiterals = function() { 
+		var numLiterals = this.correspondingBinaryString.length;
+		for (var i = 0; i < this.correspondingBinaryString.length; i++) {
+			if (this.correspondingBinaryString[i] == 'f') {
+				numLiterals--;
+			}
+		}
+		return numLiterals;
+	}
+
+
+	this.isAdjacentTo = function(OutputGroup2) {
+		let bString2 = OutputGroup2.correspondingBinaryString;
+		if (this.correspondingBinaryString.length == bString2.length) {
+			var numDiff = 0;
+			var numComplements = 0;
+			for (var i = 0; i < this.correspondingBinaryString.length; i++) {
+				if (this.correspondingBinaryString[i] != bString2[i]) {
+					numDiff++;
+					if ((this.correspondingBinaryString[i] != 'f') && (bString2[i] != 'f') ){
+						numComplements++;
+					}
+				}
+			}
+			if ((numDiff == 1) && (numComplements == 1)) {
+				/* Represents fact that two sets of outputs forms
+				 * an adjacency group iff for outputs with same dimesions,
+				 * they have the same set of variables, but one.
+				 * ex: ABC' (110)isAdjacentTo ABC (111)
+				 *  ** Not Proven, but it seems right? **
+				 */
 				return true;
 			} else {
 				return false;
 			}
-	} 
+		}
+	}
 
-	this.isAdjacentTo = function(primeImplicant2) {
-		// is Adjacent iff there exists a single complement between the two, and all other variables are the same
-		let variableList1 = this.variables;
-		let variableList2 = primeImplicant2.variables;
-		var numDiff = 0;
-		
-		for (var i = 0; i < variableList1.length; i++) {
-			if (!variableList2.includes(variableList1[i])) {
-				var complementFlag = false;
-				numDiff++;
-				for (var j = 0; j < variableList2.length; j++) {
-					if (areComplements(variableList1[i], variableList2[j])){
-						complementFlag = true;
-					}
-				}
-				if(!complementFlag) {
-					return false;
-				}
+	this.generateCombinationWith = function(outputGroup2) {
+		var newDontCareFlag = false;
+		if ((this.isDontCare) && (outputGroup2.isDontCare)) {
+			newDontCareFlag = true;
+		}
+		let bString1 = this.correspondingBinaryString;
+		let bString2 = outputGroup2.correspondingBinaryString;
+		if (bString1.length != bString2.length) {
+			console.warn("Trying to combine outputNodes of uneven sizes.");
+		}
+		var newString = "";
+		for (var i = 0; i < bString1.length; i++) {
+			let charString1 = bString1[i];
+			let charString2 = bString2[i];
+
+			if (charString1 == charString2) {
+				newString = newString.concat(charString1);
+			} else if ((charString1 != charString2) && (charString1 != "f") && (charString2 != "f")) {
+				newString = newString.concat("f");
+			} else {
+				console.warn("Invalid use of generateCombinationWith()");
+				newString = newString.concat("E"); // Error Bit
 			}
 		}
-		if (numDiff == 1) {
-			return true;
-		} else {
-			return false;
+
+		if ((newString == bString1) || (newString == bString2) ) {
+			console.warn("generatingCombination did not yield a unique result.");
 		}
+
+		return new OutputGroup(newString, newDontCareFlag);
+	}
+
+	this.generateMinterm = function() {
+
+		if (this.getNumLiterals() == 0) {
+			return "1";
+		}
+
+		var varString = "";
+		for (var i = 0; i < this.correspondingBinaryString.length; i++) {
+			if (this.correspondingBinaryString[i] == 'f') {
+				continue;
+			} else if (this.correspondingBinaryString[i] == "1") {
+				varString = varString.concat(getCorrespondingLetter(i));
+			} else {
+				varString = varString.concat(getCorrespondingLetter(i));
+				varString = varString.concat("\'");
+			}
+		}
+
+		return varString;
+	}
+	
+	this.generateMaxterm = function() {
+debugger;
+		if (this.getNumLiterals() == 0) {
+			return "0";
+		}
+
+		var varString = "";
+
+		for (var i = 0; i < this.correspondingBinaryString.length; i++) {
+			if (this.correspondingBinaryString[i] == 'f') {
+				continue;
+			} else if (this.correspondingBinaryString[i] == "0") {
+				varString = varString.concat(getCorrespondingLetter(i));
+				varString = varString.concat("+");
+			} else {
+				varString = varString.concat(getCorrespondingLetter(i));
+				varString = varString.concat("\'");
+				varString = varString.concat("+");
+			}
+		}
+		varString = varString.substring(0,varString.length-1); // Removes last addition sign
+		return varString;
 	}
 }
 
-
-function areComplements(char1, char2) {
-	if ((char1[0] == char2[0]) && (char1.length != char2.length)) {
-		return true;
-	} else {
-		return false;
+function decimalToBinary(decimalNum, numBitsAtLeast) {
+	// Returns a string
+	var binaryString = decimalNum.toString(2);
+	let sizeDiff = parseInt(numBitsAtLeast) - binaryString.length;
+	for (var i = 0; i < sizeDiff; i++) {
+		binaryString = "0" + binaryString;
 	}
+	return binaryString;
 }
