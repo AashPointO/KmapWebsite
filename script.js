@@ -306,57 +306,96 @@ while(tableRef.rows.length > 0) {
 }
 }
 
-function generateSOPFormDivNode(variableList) {
+function generateSOPDivNode(variableList) {
 	let nodeSOP = document.createElement("div");
 	
 	let titleNode = document.createElement("p");
 	titleNode.innerHTML = "SOP Prime Implicants: ";
 
 	let canonicalForm = document.createElement("p");
-	let innerText = "= ";
+	let innerText = "F = ";
 	var addedVariables = new Array();
 	
 	if (variableList[0].length == 0) {
 		innerText = innerText.concat(0);	
 	} else {
-		for (var k = 0; k < variableList.length; k++) {
-			for (var i = 0; i < variableList[k].length; i++) {
+		for (var k = 0; k < variableList.length; k++) { // For Each Set of Implicants by Variable Size
+			for (var i = 0; i < variableList[k].length; i++) { // output: ~~ + ~~ all same numVars per Implicant
 				if (isOnlyDontCares(variableList[k])) {
 					continue;
 				}
-				var text = "";
-					if (variableList[k][i].isInLargestSubGroup) {
+					if (variableList[k][i].isInLargestSubGroup) { // For Each Implicant:: 
+						var implicantText = "";
+						debugger;
 						for (var j = 0; j < variableList[k][i].variables.length; j++) {
-							if (!addedVariables.includes(variableList[k][i].variables[j])) {
-								text = text.concat(variableList[k][i].variables[j]);
-								addedVariables.push(variableList[k][i].variables[j]);
-								innerText = innerText.concat(text + " + ");
-							}
+								implicantText = implicantText.concat(variableList[k][i].variables[j]);
 						}
+								innerText = innerText.concat(implicantText + " + ");
 					}
 			}
 		}
 		innerText = innerText.substring(0,innerText.length-2);
 	}
 	if (innerText == "") {
-		innerText = "= 0";
+		innerText = "F = 0";
 	} else if (innerText.includes(1)) {
-		innerText = "= 1";
+		innerText = "F = 1";
 	}
 	canonicalForm.innerText = innerText;
 	
 	nodeSOP.appendChild(titleNode);
 	nodeSOP.appendChild(canonicalForm);
 
-
 	return nodeSOP;
 }
-function generatPOSFormDivNode() {
-let nodePOS= document.createElement("div");
-nodePOS.innerHTML = "POS";
 
+function generatePOSDivNode(variableList) {
+	let nodePOS = document.createElement("div");
+	
+	let titleNode = document.createElement("p");
+	titleNode.innerHTML = "POS Prime Implicants: ";
 
-return nodePOS;
+	let canonicalForm = document.createElement("p");
+	let innerText = "F' = ";
+	var addedVariables = new Array();
+	
+	if (variableList[0].length == 0) {
+		innerText = innerText.concat(0);	
+	} else {
+		for (var k = 0; k < variableList.length; k++) { // For Each Set of Implicants by Variable Size
+			for (var i = 0; i < variableList[k].length; i++) { 
+				if (isOnlyDontCares(variableList[k])) {
+					continue;
+				}
+				var text = "";
+					if (variableList[k][i].isInLargestSubGroup) {
+						for (var j = 0; j < variableList[k][i].variables.length; j++) { // output: ( ~ + ~ )
+								if (j == 0) {
+									text = text.concat("(");
+								} else {
+									text = text.concat(" + ");
+								}
+								text = text.concat(variableList[k][i].variables[j]);
+								if (j == (variableList[k][i].variables.length-1)) {
+									text = text.concat(")");
+								}
+							}
+						innerText = innerText.concat(text);
+					}
+			}
+		}
+	}
+	if (innerText == "") {
+		innerText = "F' = 0";
+	} else if (innerText.includes(1)) {
+		innerText = "F' = 1";
+	}
+	canonicalForm.innerText = innerText;
+	
+	nodePOS.appendChild(titleNode);
+	nodePOS.appendChild(canonicalForm);
+
+	return nodePOS;
 }
 
 function generateKMapTableNode(numBits, outputIndex) {
@@ -667,7 +706,6 @@ function returnPrimeAdjacencyList(implicantList, numBits) {
 	primeAdjacencyListBySize[4] = new Array();
 
 	for (var r = 0; r < primeAdjacencyListBySize.length; r++) {
-		debugger;
 		for (var i = 0; i < primeAdjacencyListBySize[r].length; i++) {
 
 			let primeImplicant1 = primeAdjacencyListBySize[r][i];	
