@@ -40,7 +40,7 @@
 			let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 
 			let tableRef = initTruthTable(desiredNumBits, desiredNumOutputs);
-			let outputsContainer = initOutputContainer(desiredNumBits, desiredNumOutputs, tableRef);
+			generateNewOutputsContainer("outputs-container", tableRef, desiredNumBits, desiredNumOutputs);
 
 			document.getElementById("nBits").addEventListener("focusout", nBitsTextFieldFocusOut);
 			document.getElementById("nOutputs").addEventListener("focusout", nOutputsTextFieldFocusOut);
@@ -63,46 +63,12 @@
 				return tableRef;
 			}
 
-			function initOutputContainer(numBits, numOutputs, tableRef) {
-				var outputsContainer = document.getElementById("outputs-container");
-				outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
-
-				for (var i = 0; i < numOutputs; i++) { // For Each Set of Outputs
-					let singleOutputContainer = document.createElement("div");
-					singleOutputContainer.classList.add("flex-container-single-output");
-
-					let kMapTable = generateKMapTableNode(numBits, i);
-					singleOutputContainer.appendChild(kMapTable);
-
-
-					outputsContainer.appendChild(singleOutputContainer);
-				}
-
-
-				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
-					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
-
-					let variableListSOP = getPrimeImplicants(tableRef, i, 1)
-					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
-					
-					let variableListPOS = getPrimeImplicants(tableRef, i, 1)
-					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
-
-					outputsContainer.childNodes[i].appendChild(textNodeSOP);
-					outputsContainer.childNodes[i].appendChild(textNodePOS);
-				
-				}
-
-				
-				return outputsContainer;
-			}
-
 			function nBitsTextFieldFocusOut() {
 				var tableRef = document.getElementById("truth-table");
 				let desiredNumBits = parseInt(document.getElementById("nBits").value);
 				let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 				let outputsContainer = document.getElementById("outputs-container");
-				outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
+				outputsContainer.innerHTML = ""; // Deletes all contents of outputsContainer
 
 				tableRef = resizeRows(tableRef, desiredNumBits);
 				tableRef = resizeIndexCols(tableRef);
@@ -114,63 +80,46 @@
 				tableRef = addOutputColTextFieldsToTable(tableRef);
 
 				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
-				
-				// OUTPUT HANDLING::
-				for (var i = 0; i < desiredNumOutputs; i++) { // For Each Set of Outputs
-					let singleOutputContainer = document.createElement("div");
-					singleOutputContainer.classList.add("flex-container-single-output");
-					
-					let kMapTable = generateKMapTableNode(desiredNumBits, i);
-					singleOutputContainer.appendChild(kMapTable);
-
-					outputsContainer.appendChild(singleOutputContainer);
-				}
-				
-				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
-				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
-					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
-				
-					let variableListSOP = getPrimeImplicants(tableRef, i, 1)
-					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
-					
-					let variableListPOS = getPrimeImplicants(tableRef, i, 1)
-					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
-
-					outputsContainer.childNodes[i].appendChild(textNodeSOP);
-					outputsContainer.childNodes[i].appendChild(textNodePOS);
-				
-				}
-
+				generateNewOutputsContainer("outputs-container", tableRef, desiredNumBits, desiredNumOutputs);
 				
 			}
+
 			
 			function nOutputsTextFieldFocusOut() {
 				var tableRef = document.getElementById("truth-table");
 				let desiredNumBits = parseInt(document.getElementById("nBits").value);
 				let desiredNumOutputs = parseInt(document.getElementById("nOutputs").value);
 				let outputsContainer = document.getElementById("outputs-container");
-				outputsContainer.innerHTML = ""; // Deletes all contents of outputContainer
 
 				tableRef = resizeOutputCols(tableRef, desiredNumOutputs);
 				tableRef.rows[0] = addHeaderLabels(tableRef.rows[0]);
 				tableRef = addOutputColTextFieldsToTable(tableRef);
 			
 
+				generateNewOutputsContainer("outputs-container", tableRef, desiredNumBits, desiredNumOutputs);
+
+			}
+			
+			function generateNewOutputsContainer(outputsContainerID, tableRef, numBits, numOutputs) {
+				let outputsContainer = document.getElementById(outputsContainerID);
+				outputsContainer.innerHTML = ""; // Deletes all contents of outputsContainer
+
 				// OUTPUT HANDLING::
-				for (var i = 0; i < desiredNumOutputs; i++) { // For Each Set of Outputs
+				for (var i = 0; i < numOutputs; i++) { // For Each Set of Outputs
 					let singleOutputContainer = document.createElement("div");
 					singleOutputContainer.classList.add("flex-container-single-output");
 					
-					let kMapTable = generateKMapTableNode(desiredNumBits, i);
+					let kMapTable = generateKMapTableNode(numBits, i);
 					singleOutputContainer.appendChild(kMapTable);
 
 					outputsContainer.appendChild(singleOutputContainer);
 				}
+				
+				assignIndividualValuesToKMaps(outputsContainer, tableRef, numOutputs);
 
-				assignIndividualValuesToKMaps(outputsContainer, tableRef, desiredNumOutputs);
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
-					
+				
 					let variableListSOP = getPrimeImplicants(tableRef, i, 1)
 					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
@@ -181,8 +130,7 @@
 					outputsContainer.childNodes[i].appendChild(textNodePOS);
 				
 				}
-				
-
+				return outputsContainer
 			}
 
 		</script>
