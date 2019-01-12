@@ -6,25 +6,27 @@
 		</script>
 	</head>
 	<body>
-		<div id="genBody">
-			<div>
-				<h1> K-Map Generator with Multiple Outputs </h1>
-				<div id="input-text-fields" class="standard-border"> 
-						numBits:  <input type="number" id="nBits"
-							       value=2 min=2 max=4 maxLength = 1
-							       onfocusout="ensureValidBounds('nBits', 2, 4)">
-						<br>
-						<br>
-						numOut:  <input type="number" id="nOutputs"
-								 value=1 min=1 max=8 maxLength = 1
-								 onfocusout="ensureValidBounds('nOutputs', 1, 8)">
-				</div>
-				<br>
-
+		<div class="body">
+			<h1> K-Map Generator with Multiple Outputs </h1>
+			<div class="inputs-container">
 				<table id="truth-table" class="standard-border">
 					<!-- Table is modified entirely onto the truth-table -->
 				</table>
 
+				<div id="input-text-fields" class="standard-border"> 
+					<p>Number of Bits: </p>
+					<input type="number" id="nBits"
+			  			value=2 min=2 max=4
+						onfocusout="ensureValidBounds('nBits', 2, 4)">
+					<p> Number of Outputs:  </p>
+					<input type="number" id="nOutputs"
+						value=1 min=1 max=8
+						onfocusout="ensureValidBounds('nOutputs', 1, 8)">
+				</div>
+				<br>
+
+
+			</div>
 				<br>
 				<br>
 				<br>
@@ -32,8 +34,8 @@
 				<br>
 
 				<div class="flex-container" id="outputs-container">
+					<!-- DO NOT DELETE; USED IN JS CODE -->
 				</div>
-			</div>
 		</div>
 
 		<div class="footer">

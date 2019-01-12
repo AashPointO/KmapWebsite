@@ -97,9 +97,11 @@ function assignBitsToRow(singleRow) {
 			let index = singleRow.cells[j].dataset.bitindex;
 			let value = binaryRepresentation[index];
 			if (typeof value === "undefined") {
-				singleRow.cells[j].innerHTML = 0;
+				singleRow.cells[j].innerHTML = "";
+				singleRow.cells[j].appendChild(document.createTextNode("0"));
 			} else {
-				singleRow.cells[j].innerHTML = binaryRepresentation[(binaryRepresentation.length-1)-index];
+				singleRow.cells[j].innerHTML = "";
+				singleRow.cells[j].appendChild(document.createTextNode(binaryRepresentation[(binaryRepresentation.length-1)-index]));
 			}
 		}
 	}
@@ -472,13 +474,6 @@ function generateKMapTableNode(numBits, outputIndex) {
 	return kMapTable;
 }
 
-function addBarTo(text) {
-	let prefix = "<span style=\"text-decoration: overline;\">";
-	let suffix = "<\span>";
-	return (prefix + text + suffix);
-
-
-}
 function getCorrespondingLetter(index) {
 	switch (index) {
 		case 0:
@@ -507,24 +502,35 @@ function generateSOPDivNodeFor(primeImplicants) {
 	let nodeSOP = document.createElement("div");
 	
 	let titleNode = document.createElement("p");
-	titleNode.innerHTML = "SOP Prime Implicants: ";
+	titleNode.innerText = "SOP Prime Implicants: ";
 
 	let canonicalForm = document.createElement("p");
-	
-	canonicalForm.innerText = "F = ";
+	canonicalForm.classList.add("implicant-output");
+	canonicalForm.appendChild(document.createTextNode("F = "));
 
 	if (primeImplicants.length == 0) {
-		canonicalForm.innerText = "F = 0";
+		canonicalForm.appendChild(document.createTextNode("0"));
 	} else {
 		for (var i = 0; i < primeImplicants.length; i++) { // For each Implicant
 			var mintermText = primeImplicants[i].generateMinterm();
 			if (mintermText == "1") {
-				canonicalForm.innerText = "F = 1";
+				canonicalForm.appendChild(document.createTextNode("1"));
 				break;
-			}
-			canonicalForm.innerText = canonicalForm.innerText.concat(mintermText);
-			if (i != primeImplicants.length - 1) {
-				canonicalForm.innerText = canonicalForm.innerText.concat(" + ");
+			} else {
+				var child;
+				for (var j = 0; j < mintermText.length; j++) {
+					if (j < mintermText.length-1) {
+						if (mintermText[j+1] == "\'") {
+							canonicalForm.appendChild(createDivNodeWithOverline(mintermText[j]));
+							j++;
+						} else {
+							canonicalForm.appendChild(document.createTextNode(mintermText[j]));
+						}
+					}
+				}
+				if (i != primeImplicants.length - 1) {
+					canonicalForm.appendChild(document.createTextNode(" + "));
+				}
 			}
 		}
 	}
@@ -539,32 +545,54 @@ function generatePOSDivNodeFor(primeImplicants) {
 	let nodePOS = document.createElement("div");
 	
 	let titleNode = document.createElement("p");
-	titleNode.innerHTML = "POS Prime Implicants: ";
+	titleNode.innerText = "POS Prime Implicants: ";
 
+	//let canonicalForm = document.createElement("p");
+	//canonicalForm.innerText = "F' = ";
 	let canonicalForm = document.createElement("p");
-	canonicalForm.innerText = "F' = ";
-	
+	canonicalForm.classList.add("implicant-output");
+	canonicalForm.appendChild(createDivNodeWithOverline("F"));
+	canonicalForm.appendChild(document.createTextNode(" = "));
+
 	if (primeImplicants.length == 0) { // No possible set of inputs
-		canonicalForm.innerText = "F' = 1";
+		canonicalForm.appendChild(document.createTextNode("1"));
 	} else {
 		for (var i = 0; i < primeImplicants.length; i++) { // For each Implicant
 			var maxtermText = primeImplicants[i].generateMaxterm();
-				if (maxtermText == "0") {
-					canonicalForm.innerText = "F' = 0";
-				} else if (primeImplicants.length > 1) {
-					canonicalForm.innerText = canonicalForm.innerText.concat(" ( ");
-					canonicalForm.innerText = canonicalForm.innerText.concat(maxtermText);
-					canonicalForm.innerText = canonicalForm.innerText.concat(" ) ");
-				} else {
-					canonicalForm.innerText = canonicalForm.innerText.concat(maxtermText);
+			if (maxtermText == "0") {
+				canonicalForm.appendChild(document.createTextNode("0"));
+			} else {
+				for (var j = 0; j < maxtermText.length; j++){
+					var needClosingBrace = false;
+					if (primeImplicants.length > 1) {
+						canonicalForm.appendChild(document.createTextNode((" ( ")));
+						neexClosingBrace = true;
+					}
+					if ((j < maxtermText.length-1) && (maxtermText[j+1] == "\'")) {
+						canonicalForm.appendChild(createDivNodeWithOverline(maxtermText[j]));
+						j++;
+					} else {
+						canonicalForm.appendChild(document.createTextNode(maxtermText[j]));
+					}
+					if (needClosingBrace) {
+						canonicalForm.appendChild(document.createTextNode((" ) ")));
+					}
 				}
 			}
+		}
 	}
 	
 	nodePOS.appendChild(titleNode);
 	nodePOS.appendChild(canonicalForm);
 
 	return nodePOS;
+}
+
+function createDivNodeWithOverline(text) {
+	let textNode = document.createElement("p");
+	textNode.innerText = text;
+	textNode.setAttribute("style", "text-decoration: overline;");
+	return textNode;
 }
 
 function getPrimeImplicants(tableRef, colIndex, value) {
