@@ -461,24 +461,30 @@ switch (numBits) {
 return kMapTable;
 }
 
+function addBarTo(text) {
+	let prefix = "<span style=\"text-decoration: overline;\">";
+	let suffix = "<\span>";
+	return (prefix + text + suffix);
 
-function getCorrespondingLetter(index) {
-switch (index) {
-	case 0:
-		return "A";
-	case 1:
-		return "B";
-	case 2: 
-		return "C";
-	case 3:
-		return "D";
-	case 4:
-		return "E";
-	case 5:
-		return "F";
-	default:
-		return "NA";
+
 }
+function getCorrespondingLetter(index) {
+	switch (index) {
+		case 0:
+			return "A";
+		case 1:
+			return "B";
+		case 2: 
+			return "C";
+		case 3:
+			return "D";
+		case 4:
+			return "E";
+		case 5:
+			return "F";
+		default:
+			return "NA";
+	}
 }
 
 
@@ -486,34 +492,31 @@ switch (index) {
 // *** SOP/POS Algorithms *** //
 // ************************** //
 
-function generateSOPDivNodeFor(variableList) {
+function generateSOPDivNodeFor(primeImplicants) {
 	let nodeSOP = document.createElement("div");
 	
 	let titleNode = document.createElement("p");
 	titleNode.innerHTML = "SOP Prime Implicants: ";
 
 	let canonicalForm = document.createElement("p");
-	let innerText = "F = ";
-	var addedImplicants = new Array();
 	
-	if ((variableList.length() == 0) || (variableList.length() == variableList.numDontCares())) { // No possible set of inputs
-		innerText = innerText.concat(0);	
+	canonicalForm.innerText = "F = ";
+
+	if (primeImplicants.length == 0) {
+		canonicalForm.innerText = "F = 0";
 	} else {
-		for (var k = 0; k < variableList.length(); k++) { // For each Implicant
-			let currImplicant = variableList.at(k);
-			if ((!currImplicant.isDontCare) && (currImplicant.isInLargestGroup)) { 
-				var implicantText = currImplicant.generateMinterm();
-				if (!addedImplicants.includes(implicantText)) {
-					innerText = innerText.concat(implicantText);
-					innerText = innerText.concat(" + ");
-					addedImplicants.push(implicantText);
-				}
+		for (var i = 0; i < primeImplicants.length; i++) { // For each Implicant
+			var mintermText = primeImplicants[i].generateMinterm();
+			if (mintermText == "1") {
+				canonicalForm.innerText = "F = 1";
+				break;
+			}
+			canonicalForm.innerText = canonicalForm.innerText.concat(mintermText);
+			if (i != primeImplicants.length - 1) {
+				canonicalForm.innerText = canonicalForm.innerText.concat(" + ");
 			}
 		}
-		innerText = innerText.substring(0,innerText.length-2); // removes last addition sign
 	}
-
-	canonicalForm.innerText = innerText;
 	
 	nodeSOP.appendChild(titleNode);
 	nodeSOP.appendChild(canonicalForm);
@@ -521,40 +524,31 @@ function generateSOPDivNodeFor(variableList) {
 	return nodeSOP;
 }
 
-function generatePOSDivNodeFor(variableList) {
+function generatePOSDivNodeFor(primeImplicants) {
 	let nodePOS = document.createElement("div");
 	
 	let titleNode = document.createElement("p");
 	titleNode.innerHTML = "POS Prime Implicants: ";
 
 	let canonicalForm = document.createElement("p");
-	let innerText = "F = ";
-	var addedImplicants = new Array();
+	canonicalForm.innerText = "F' = ";
 	
-	if (variableList.length() == 0) { // No possible set of inputs
-		innerText = innerText.concat(1);	
+	if (primeImplicants.length == 0) { // No possible set of inputs
+		canonicalForm.innerText = "F' = 1";
 	} else {
-		for (var k = 0; k < variableList.length(); k++) { // For each Implicant
-			let currImplicant = variableList.at(k);
-			if ((!currImplicant.isDontCare) && (currImplicant.isInLargestGroup)) { 
-				var implicantText = currImplicant.generateMaxterm();
-				if (!addedImplicants.includes(implicantText)) {
-					if (implicantText != "0") {
-						innerText = innerText.concat(" ( ");
-						innerText = innerText.concat(implicantText);
-						innerText = innerText.concat(" ) ");
-					} else {
-						innerText = innerText.concat(implicantText);
-					}
-					addedImplicants.push(implicantText);
+		for (var i = 0; i < primeImplicants.length; i++) { // For each Implicant
+			var maxtermText = primeImplicants[i].generateMaxterm();
+				if (maxtermText == "0") {
+					canonicalForm.innerText = "F' = 0";
+				} else if (primeImplicants.length > 1) {
+					canonicalForm.innerText = canonicalForm.innerText.concat(" ( ");
+					canonicalForm.innerText = canonicalForm.innerText.concat(maxtermText);
+					canonicalForm.innerText = canonicalForm.innerText.concat(" ) ");
+				} else {
+					canonicalForm.innerText = canonicalForm.innerText.concat(maxtermText);
 				}
 			}
-		}
 	}
-	if (innerText == "F = ") {
-		innerText = innerText.concat("1");
-	}
-	canonicalForm.innerText = innerText;
 	
 	nodePOS.appendChild(titleNode);
 	nodePOS.appendChild(canonicalForm);
@@ -562,28 +556,49 @@ function generatePOSDivNodeFor(variableList) {
 	return nodePOS;
 }
 
-function getSOP_PrimeImplicantsAt(colIndex, tableRef) {
-	let primeImplicantSet = new OutputColSet(colIndex, "1", tableRef);
+function getPrimeImplicants(tableRef, colIndex, value) {
+	let primeImplicants = new Array();
+
 	let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
 	let totPossibleNumGroupSizes = numBits + 1;
+	
+	let implicantSetBySize = new Array(totPossibleNumGroupSizes); // Type: **AdjacencyGroup
+	implicantSetBySize[0] = grabImplicantsFromTable(tableRef, colIndex, parseInt(value)); // Type *AdjacencyGroup
+	for (var i = 1; i < numBits*numBits; i++) {
+		implicantSetBySize[i] = new Array();
+	}
+	
+	for (var i = 0; i < implicantSetBySize.length; i++) {
+		for (var j = 0; j < implicantSetBySize[i].length-1; j++) {
+			for (var k = j+1; k < implicantSetBySize[i].length; k++) {
+				let implicant1 = implicantSetBySize[i][j];
+				let implicant2 = implicantSetBySize[i][k];
 
-	primeImplicantSet.grabAllOutputNodesFromTable(tableRef);
-	for (var i = 0; i < primeImplicantSet.length(); i++) {
-		for (var j = i+1; j < primeImplicantSet.length(); j++) {
-			let implicant1 = primeImplicantSet.at(i);
-			let implicant2 = primeImplicantSet.at(j);
-			if (implicant1.isAdjacentTo(implicant2)) {
-				primeImplicantSet.push(implicant1.generateCombinationWith(implicant2));
-				primeImplicantSet.outputSet[i].isInLargestGroup = false;
-				primeImplicantSet.outputSet[j].isInLargestGroup = false;
+				if ((implicant2 != null) && (implicant1 != null)) {
+					if (implicant1.isAdjacentTo(implicant2)) {
+						implicantSetBySize[i+1].push(implicant1.generateCombinationWith(implicant2));
+						implicantSetBySize[i][j].isInLargestGroup = false;
+						implicantSetBySize[i][k].isInLargestGroup = false;
+					}
+				} 
 			}
 		}
 	}
-	return primeImplicantSet;
+
+
+	for (var i = 0; i < implicantSetBySize.length; i++) {
+		for (var j = 0; j < implicantSetBySize[i].length; j++) {
+			if ((implicantSetBySize[i][j].isInLargestGroup) && (!implicantSetBySize[i][j].isDontCare)) {
+				primeImplicants.push(implicantSetBySize[i][j]);
+			}
+		}
+	}
+
+
+	return primeImplicants;
 }
 
-
-function getPOS_PrimeImplicantsAt(colIndex, tableRef) {
+/*function getPOS_PrimeImplicantsAt(colIndex, tableRef) {
 	let primeImplicantSet = new OutputColSet(colIndex, "0", tableRef);
 	let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
 	let totPossibleNumGroupSizes = numBits + 1;
@@ -602,12 +617,52 @@ function getPOS_PrimeImplicantsAt(colIndex, tableRef) {
 	}
 	return primeImplicantSet;
 }
+*/
 
+function grabImplicantsFromTable(tableRef, outputIndex, valueDesired) {
+	implicantSet = new Array();
 
+	// Under assumpion col has dataset-outputindex
+	for (var i = 1; i < tableRef.rows.length; i++) { // Ignoring Header Row
+		var currRow = tableRef.rows[i];
+
+		for (var j = 1; j < currRow.cells.length; j++) {
+
+			if (j >= tableRef.rows[0].cells.length) { // ERROR HANDLING
+				console.error("ERROR AT resetWithNumRowsAt()\nCould not Find ColIndex:" + j);
+			}
+
+			let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
+			let binaryString = decimalToBinary(i-1, numBits); // i-1 b/c row value starts at 0, but index starts at 1
+			var dontCareFlag;
+
+			currCol = tableRef.rows[i].cells[j];
+
+			if (parseInt(currCol.dataset.outputindex) == outputIndex) {
+				switch (currCol.firstElementChild.value) {
+					case valueDesired.toString(10):
+						var dontCareFlag = false;			
+						var outputToPush = new AdjacencyGroup(binaryString, dontCareFlag);
+						implicantSet.push(outputToPush);
+						break;
+					case "x":
+						var dontCareFlag = true;			
+						var outputToPush = new AdjacencyGroup(binaryString, dontCareFlag);
+						implicantSet.push(outputToPush);
+						break;
+					default:
+						break;
+				}
+			}
+		}
+	}
+	return implicantSet;
+}
+/*
 function OutputColSet(outputIndex, valueDesired, tableRef) {
 	// One for SOP, another for POS:: 
 	this.outputIndex = parseInt(outputIndex);
-	// outputSet is of type *OutputGroup
+	// outputSet is of type *AdjacencyGroup
 	this.outputSet = new Array();
 	this.valueDesired = valueDesired;
 
@@ -653,12 +708,12 @@ function OutputColSet(outputIndex, valueDesired, tableRef) {
 					switch (currCol.firstElementChild.value) {
 						case valueDesired:
 							var dontCareFlag = false;			
-							var outputToPush = new OutputGroup(binaryString, dontCareFlag);
+							var outputToPush = new AdjacencyGroup(binaryString, dontCareFlag);
 							this.outputSet.push(outputToPush);
 							break;
 						case "x":
 							var dontCareFlag = true;			
-							var outputToPush = new OutputGroup(binaryString, dontCareFlag);
+							var outputToPush = new AdjacencyGroup(binaryString, dontCareFlag);
 							this.outputSet.push(outputToPush);
 							break;
 						default:
@@ -683,8 +738,8 @@ function OutputColSet(outputIndex, valueDesired, tableRef) {
 		return -1;
 	}
 }
-	
-function OutputGroup(correspondingBinaryString, isDontCare) {
+*/	
+function AdjacencyGroup(correspondingBinaryString, isDontCare) {
 	// 1 for HIGH, 0 for LOW
 	// f for FACTOREDOUT; that way numBits stays same
 	// ex: 10f0 === A B' C(factored out) D' 
@@ -707,8 +762,8 @@ function OutputGroup(correspondingBinaryString, isDontCare) {
 	}
 
 
-	this.isAdjacentTo = function(OutputGroup2) {
-		let bString2 = OutputGroup2.correspondingBinaryString;
+	this.isAdjacentTo = function(AdjacencyGroup2) {
+		let bString2 = AdjacencyGroup2.correspondingBinaryString;
 		if (this.correspondingBinaryString.length == bString2.length) {
 			var numDiff = 0;
 			var numComplements = 0;
@@ -763,7 +818,7 @@ function OutputGroup(correspondingBinaryString, isDontCare) {
 			console.warn("generatingCombination did not yield a unique result.");
 		}
 
-		return new OutputGroup(newString, newDontCareFlag);
+		return new AdjacencyGroup(newString, newDontCareFlag);
 	}
 
 	this.generateMinterm = function() {
@@ -788,7 +843,6 @@ function OutputGroup(correspondingBinaryString, isDontCare) {
 	}
 	
 	this.generateMaxterm = function() {
-debugger;
 		if (this.getNumLiterals() == 0) {
 			return "0";
 		}

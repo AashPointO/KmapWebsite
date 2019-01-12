@@ -82,10 +82,10 @@
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
 
-					let variableListSOP = getSOP_PrimeImplicantsAt(i, tableRef)
+					let variableListSOP = getPrimeImplicants(tableRef, i, 1)
 					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
-					let variableListPOS = getPOS_PrimeImplicantsAt(i, tableRef)
+					let variableListPOS = getPrimeImplicants(tableRef, i, 1)
 					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
 
 					outputsContainer.childNodes[i].appendChild(textNodeSOP);
@@ -130,11 +130,10 @@
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
 				
-					let variableListSOP = getSOP_PrimeImplicantsAt(i, tableRef)
+					let variableListSOP = getPrimeImplicants(tableRef, i, 1)
 					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
-					let variableListPOS = getPOS_PrimeImplicantsAt(i, tableRef)
-					debugger;
+					let variableListPOS = getPrimeImplicants(tableRef, i, 1)
 					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
 
 					outputsContainer.childNodes[i].appendChild(textNodeSOP);
@@ -172,10 +171,10 @@
 				for (var i = 0; i < outputsContainer.childNodes.length; i++) {
 					let kMapTable = outputsContainer.childNodes[i].firstElementChild;
 					
-					let variableListSOP = getSOP_PrimeImplicantsAt(i, tableRef)
+					let variableListSOP = getPrimeImplicants(tableRef, i, 1)
 					let textNodeSOP = generateSOPDivNodeFor(variableListSOP);
 					
-					let variableListPOS = getPOS_PrimeImplicantsAt(i, tableRef)
+					let variableListPOS = getPrimeImplicants(tableRef, i, 1)
 					let textNodePOS = generatePOSDivNodeFor(variableListPOS);
 
 					outputsContainer.childNodes[i].appendChild(textNodeSOP);
