@@ -11,6 +11,18 @@ html, html * {
 	font-family: Libre Baskerville;
 }
 
+.footer {
+	padding: 25px
+}
+
+.footer-text {
+	color: #c6c6c6;
+	margin: auto;
+	text-align: center;
+	width: 50%;
+	font-size: 0.75em;
+	line-height: 1.75em;
+}
 #input-text-fields {
 	/* :: TODO ::
 	 * 	make scalability of words look better;
