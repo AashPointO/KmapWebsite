@@ -32,8 +32,24 @@ function ensureValidOutputCellText(cellTextRef) {
 			cellTextRef.value = 0;
 		}
 	} 
-	nOutputsTextFieldFocusOut();
 } 
+
+function addShading(element, value) {
+	element.classList.remove("green-shade");
+	element.classList.remove("red-shade");
+	element.classList.remove("grey-shade");
+	switch (value) {
+		case '1':
+			element.classList.add("green-shade");
+			break;
+		case '0':
+			element.classList.add("red-shade");
+			break;
+		default:
+			element.classList.add("grey-shade");
+			break;
+	}
+}
 
 function  assignIndividualValuesToKMaps(outputsContainer, tableRef, numOutputs) {
 	let indexFirstOutput = tableRef.rows[0].cells.length - numOutputs;
@@ -52,6 +68,8 @@ function  assignIndividualValuesToKMaps(outputsContainer, tableRef, numOutputs) 
 					var decimalVal = kMaps[a].firstChild.rows[i].cells[j].dataset.decimalvalue;
 					if (kMaps[a].firstChild.rows[i].cells[j].dataset.decimalvalue != null) {
 						kMaps[a].firstChild.rows[i].cells[j].innerText = outputsArray[parseInt(decimalVal)];
+						kMaps[a].firstChild.rows[i].cells[j].classList.add("grey-shade");
+						addShading(kMaps[a].firstChild.rows[i].cells[j], kMaps[a].firstChild.rows[i].cells[j].innerText);
 					}
 				}
 			}
@@ -109,8 +127,11 @@ function addOutputColTextFieldsToRow(singleRow, rowIndex) {
 				textNode.defaultValue = 0;
 				textNode.maxLength= 1;
 				singleRow.cells[i].appendChild(textNode);
+				addShading(textNode.parentElement, textNode.value);
 				textNode.addEventListener("focusout", function() {
 					ensureValidOutputCellText(textNode)
+					addShading(textNode.parentElement, textNode.value);
+					nOutputsTextFieldFocusOut();
 				});
 			}
 			let textNode = singleRow.cells[i].firstElementChild;

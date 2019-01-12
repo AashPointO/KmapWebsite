@@ -16,6 +16,7 @@ html, html * {
 }
 
 .footer-text {
+	font-family: Comic Sans Ms;
 	color: #c6c6c6;
 	margin: auto;
 	text-align: center;
@@ -23,6 +24,13 @@ html, html * {
 	font-size: 0.75em;
 	line-height: 1.75em;
 }
+
+.source-code-text {
+	font-family: Comic Sans Ms;
+	color: #9679ff;
+}
+
+
 #input-text-fields {
 	/* :: TODO ::
 	 * 	make scalability of words look better;
@@ -108,4 +116,16 @@ html, html * {
 .flex-container>* {
         flex: 1 1 160px;
         margin: 20px;
-      }
+}
+
+.green-shade {
+	background: rgba(25, 255, 44, 0.35);
+}
+
+.red-shade {
+	background: rgba(255, 25, 25, 0.35);
+}
+
+.grey-shade {
+	background: rgba(168, 168, 168, 0.35);
+}
