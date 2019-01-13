@@ -634,7 +634,16 @@ function getPrimeImplicants(tableRef, colIndex, value) {
 	for (var i = 0; i < implicantSetBySize.length; i++) {
 		for (var j = 0; j < implicantSetBySize[i].length; j++) {
 			if ((implicantSetBySize[i][j].isInLargestGroup) && (!implicantSetBySize[i][j].isDontCare)) {
-				primeImplicants.push(implicantSetBySize[i][j]);
+				var alreadyIncluded = false;
+				for (var k = 0; k < primeImplicants.length; k++) {
+					if (primeImplicants[k].isEquivalentTo(implicantSetBySize[i][j])) {
+						alreadyIncluded = true;
+						break;
+					}
+				}
+				if (!alreadyIncluded) {
+					primeImplicants.push(implicantSetBySize[i][j]);
+				}
 			}
 		}
 	}
@@ -642,27 +651,6 @@ function getPrimeImplicants(tableRef, colIndex, value) {
 
 	return primeImplicants;
 }
-
-/*function getPOS_PrimeImplicantsAt(colIndex, tableRef) {
-	let primeImplicantSet = new OutputColSet(colIndex, "0", tableRef);
-	let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
-	let totPossibleNumGroupSizes = numBits + 1;
-
-	primeImplicantSet.grabAllOutputNodesFromTable(tableRef);
-	for (var i = 0; i < primeImplicantSet.length(); i++) {
-		for (var j = i+1; j < primeImplicantSet.length(); j++) {
-			let implicant1 = primeImplicantSet.at(i);
-			let implicant2 = primeImplicantSet.at(j);
-			if (implicant1.isAdjacentTo(implicant2)) {
-				primeImplicantSet.push(implicant1.generateCombinationWith(implicant2));
-				primeImplicantSet.outputSet[i].isInLargestGroup = false;
-				primeImplicantSet.outputSet[j].isInLargestGroup = false;
-			}
-		}
-	}
-	return primeImplicantSet;
-}
-*/
 
 function grabImplicantsFromTable(tableRef, outputIndex, valueDesired) {
 	implicantSet = new Array();
@@ -703,87 +691,7 @@ function grabImplicantsFromTable(tableRef, outputIndex, valueDesired) {
 	}
 	return implicantSet;
 }
-/*
-function OutputColSet(outputIndex, valueDesired, tableRef) {
-	// One for SOP, another for POS:: 
-	this.outputIndex = parseInt(outputIndex);
-	// outputSet is of type *AdjacencyGroup
-	this.outputSet = new Array();
-	this.valueDesired = valueDesired;
 
-	this.length = function() {
-		return this.outputSet.length;
-	}
-
-	this.numDontCares = function() {
-		var numDontCares = 0;
-		for (var i = 0; i < this.outputSet.length; i++) {
-			if (this.outputSet[i].isDontCare) {
-				numDontCares++;
-			}
-		}
-		return numDontCares;
-	}
-	
-	this.at = function(index) {
-		return this.outputSet[index];
-	}
-
-	this.grabAllOutputNodesFromTable = function(tableRef) {
-		// OutputCol should be Reset ONLY if numBits is changed
-		// All old values are lost
-		this.outputSet = new Array();
-		// Under assumpion col has dataset-outputindex
-		for (var i = 1; i < tableRef.rows.length; i++) { // Ignoring Header Row
-			var currRow = tableRef.rows[i];
-
-			for (var j = 1; j < currRow.cells.length; j++) {
-
-				if (j >= tableRef.rows[0].cells.length) { // ERROR HANDLING
-					console.error("ERROR AT resetWithNumRowsAt()\nCould not Find ColIndex:" + j);
-				}
-
-				let numBits = parseInt(tableRef.rows[0].cells[1].dataset.bitindex) + 1;
-				let binaryString = decimalToBinary(i-1, numBits); // i-1 b/c row value starts at 0, but index starts at 1
-				var dontCareFlag;
-
-				currCol = tableRef.rows[i].cells[j];
-
-				if (parseInt(currCol.dataset.outputindex) == this.outputIndex) {
-					switch (currCol.firstElementChild.value) {
-						case valueDesired:
-							var dontCareFlag = false;			
-							var outputToPush = new AdjacencyGroup(binaryString, dontCareFlag);
-							this.outputSet.push(outputToPush);
-							break;
-						case "x":
-							var dontCareFlag = true;			
-							var outputToPush = new AdjacencyGroup(binaryString, dontCareFlag);
-							this.outputSet.push(outputToPush);
-							break;
-						default:
-							break;
-					}
-				}
-			}
-		}
-	}
-	
-	this.push = function(outputToPush) {
-		this.outputSet.push(outputToPush);
-	}
-
-	this.getIndexForBinaryString = function(bStringCheckingFor) {
-		for (var i = 0; i < this.outputSet.length; i++) {
-			let currOutput = this.outputSet[i];
-			if (currOutput.correspondingBinaryString == bStringCheckingFor) {
-				return i;
-			}
-		}
-		return -1;
-	}
-}
-*/	
 function AdjacencyGroup(correspondingBinaryString, isDontCare) {
 	// 1 for HIGH, 0 for LOW
 	// f for FACTOREDOUT; that way numBits stays same
@@ -804,6 +712,18 @@ function AdjacencyGroup(correspondingBinaryString, isDontCare) {
 			}
 		}
 		return numLiterals;
+	}
+
+	this.isEquivalentTo = function(AdjacencyGroup2) {
+		let bString2 = AdjacencyGroup2.correspondingBinaryString;
+		let bString1 = this.correspondingBinaryString;
+
+		if (bString1.localeCompare(bString2) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 
 
