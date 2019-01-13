@@ -517,15 +517,11 @@ function generateSOPDivNodeFor(primeImplicants) {
 				canonicalForm.appendChild(document.createTextNode("1"));
 				break;
 			} else {
-				var child;
-				var needAdditionSign = false;
 				for (var j = 0; j < mintermText.length; j++) {
-					if (j < mintermText.length-1) {
-						if (mintermText[j+1] == "\'") {
+					if ((j < mintermText.length-1) && (mintermText[j+1] == "\'")) {
 							canonicalForm.appendChild(createDivNodeWithOverline(mintermText[j]));
 							canonicalForm.appendChild(document.createTextNode(" "));
 							j++;
-						}
 					} else {
 						canonicalForm.appendChild(document.createTextNode(mintermText[j]));
 						canonicalForm.appendChild(document.createTextNode(" "));
