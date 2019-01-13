@@ -113,6 +113,7 @@ html, html * {
 .flex-container-sop-pos-container {
 	display: flex;
 	flex-direction: column;
+	wrap: nowrap;
 	align-items: center;
 	justify-content: space-between;
 }

@@ -518,15 +518,18 @@ function generateSOPDivNodeFor(primeImplicants) {
 				break;
 			} else {
 				var child;
+				var needAdditionSign = false;
 				for (var j = 0; j < mintermText.length; j++) {
 					if (j < mintermText.length-1) {
 						if (mintermText[j+1] == "\'") {
 							canonicalForm.appendChild(createDivNodeWithOverline(mintermText[j]));
+							canonicalForm.appendChild(document.createTextNode(" "));
 							j++;
-						} else {
-							canonicalForm.appendChild(document.createTextNode(mintermText[j]));
 						}
-					}
+					} else {
+						canonicalForm.appendChild(document.createTextNode(mintermText[j]));
+						canonicalForm.appendChild(document.createTextNode(" "));
+					} 
 				}
 				if (i != primeImplicants.length - 1) {
 					canonicalForm.appendChild(document.createTextNode(" + "));
@@ -561,22 +564,25 @@ function generatePOSDivNodeFor(primeImplicants) {
 			var maxtermText = primeImplicants[i].generateMaxterm();
 			if (maxtermText == "0") {
 				canonicalForm.appendChild(document.createTextNode("0"));
+				break;
 			} else {
+				var needClosingBrace = false;
+				if (primeImplicants.length > 1) {
+					canonicalForm.appendChild(document.createTextNode((" ( ")));
+					needClosingBrace = true;
+				}
 				for (var j = 0; j < maxtermText.length; j++){
-					var needClosingBrace = false;
-					if (primeImplicants.length > 1) {
-						canonicalForm.appendChild(document.createTextNode((" ( ")));
-						neexClosingBrace = true;
-					}
 					if ((j < maxtermText.length-1) && (maxtermText[j+1] == "\'")) {
 						canonicalForm.appendChild(createDivNodeWithOverline(maxtermText[j]));
+						canonicalForm.appendChild(document.createTextNode(" "));
 						j++;
 					} else {
 						canonicalForm.appendChild(document.createTextNode(maxtermText[j]));
+						canonicalForm.appendChild(document.createTextNode(" "));
 					}
-					if (needClosingBrace) {
-						canonicalForm.appendChild(document.createTextNode((" ) ")));
-					}
+				}
+				if (needClosingBrace) {
+					canonicalForm.appendChild(document.createTextNode((" ) ")));
 				}
 			}
 		}
